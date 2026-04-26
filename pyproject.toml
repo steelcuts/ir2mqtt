@@ -13,7 +13,7 @@ classifiers = [
 
 dependencies = [
     "fastapi",
-    "uvicorn[standard]",
+    "uvicorn",
     "paho-mqtt",
     "pydantic",
     "pydantic-settings",

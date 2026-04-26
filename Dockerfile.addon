@@ -24,15 +24,15 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Ensure logs are output immediately to the terminal
 ENV PYTHONUNBUFFERED=1
 
-# Install Python
-RUN apk add --no-cache python3 py3-pip bash
+# Install Python dependencies (build tools needed to compile greenlet on armv7)
+RUN apk add --no-cache python3 py3-pip bash gcc g++ musl-dev python3-dev
 
 WORKDIR /app
 COPY --from=builder /app/dist ./dist
 
-# Install Python dependencies
 COPY requirements.txt .
-RUN pip3 install --no-cache-dir -r requirements.txt --break-system-packages
+RUN pip3 install --no-cache-dir -r requirements.txt --break-system-packages \
+    && apk del gcc g++ musl-dev python3-dev
 
 COPY backend /app/backend
 COPY run.sh /app/run.sh
