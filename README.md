@@ -14,7 +14,7 @@ IR2MQTT bridges the gap between physical Infrared devices and your smart home. I
 
 ## Documentation & Manual
 
-For full details on features, configuration, MQTT topics, and development instructions, please visit the **IR2MQTT Documentation Site** or read the Markdown files in the `docs/` folder.
+For full details on features, configuration, MQTT topics, and development instructions, please visit the **[IR2MQTT Documentation](https://steelcuts.github.io/ir2mqtt/)** or read the Markdown files in the `docs/` folder.
 
 For details on ESPHome bridge setup please see the **[ir2mqtt_bridge Repository](https://github.com/steelcuts/ir2mqtt_bridge)**.
 
