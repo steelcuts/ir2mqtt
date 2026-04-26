@@ -1,7 +1,8 @@
 ARG BUILD_FROM=ghcr.io/home-assistant/alpine-base:3.20
 
 # --- Frontend Build Stage ---
-FROM node:22-alpine AS builder
+# Always build on the native CI platform — node:22-alpine has no linux/386 or linux/arm/v6 image
+FROM --platform=$BUILDPLATFORM node:22-alpine AS builder
 
 WORKDIR /app/frontend
 
