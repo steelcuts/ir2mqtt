@@ -30,7 +30,10 @@ COPY --from=builder /app/dist ./dist
 
 # Install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN apt-get update && apt-get install -y --no-install-recommends gcc g++ \
+    && pip install --no-cache-dir -r requirements.txt \
+    && apt-get purge -y --auto-remove gcc g++ \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy migration scripts and configuration
 COPY migrations /app/migrations
