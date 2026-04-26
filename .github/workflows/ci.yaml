@@ -214,9 +214,9 @@ jobs:
       matrix:
         include:
           - dockerfile: Dockerfile
-            suffix: ""
+            image_suffix: ""
           - dockerfile: Dockerfile.ha-app
-            suffix: "-ha-app"
+            image_suffix: "-ha-app"
 
     steps:
       - name: Checkout repository
@@ -243,10 +243,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          flavor: |
-            latest=auto
-            suffix=${{ matrix.suffix }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}${{ matrix.image_suffix }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=semver,pattern={{version}}

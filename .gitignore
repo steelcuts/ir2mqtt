@@ -45,4 +45,4 @@ tools/simulator/simulator_config.json
 simulator_config.json
 untranslated_strings.csv
 .vitepress
-addon-repo/
+ha-app-repo/
