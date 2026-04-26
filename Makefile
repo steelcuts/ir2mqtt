@@ -15,7 +15,8 @@ M ?= auto_migration
 
 .DEFAULT_GOAL := help
 
-IMAGE_TAG ?= ir2mqtt:local
+IMAGE_TAG    ?= ir2mqtt:local
+IMAGE_TAG_HA ?= ir2mqtt-ha-app:local
 
 help:
 	@echo ""
@@ -38,9 +39,9 @@ help:
 	@echo "  make migrate           		Apply all pending migrations"
 	@echo "  make migrate-stamp     		Mark current database state as the latest (stamp head)"
 	@echo "  make migrate-check     		Verify that models and migrations are in sync"
-	@echo "  make docker-build        		Build Docker image for current platform (local testing)"
-	@echo "  make docker-build-multi 		Build multi-platform image (linux/amd64 + linux/arm64, like CI)"
-	@echo "  make docker-run         		Run the built image + Mosquitto (http://localhost:8099)"
+	@echo "  make docker-build        		Build both Docker images for current platform (local testing)"
+	@echo "  make docker-build-multi 		Build both images multi-platform (amd64 + arm64 + armv7, like CI)"
+	@echo "  make docker-run         		Run the standalone image + Mosquitto (http://localhost:8099)"
 	@echo "  make docker-stop        		Stop and remove the local test containers"
 	@echo "  make showcase           		Generate a UI showcase video/GIF using Playwright"
 	@echo "  make doc-gifs           		Generate per-feature GIFs for VitePress documentation"
@@ -71,13 +72,15 @@ build-all:
 
 # ── Docker image build ────────────────────────────────────────────────────────
 
-# Build for the current platform only — fast, for local testing
+# Build both images for the current platform — fast, for local testing
 docker-build:
-	docker buildx build --load -t $(IMAGE_TAG) .
+	docker buildx build --load -f Dockerfile    -t $(IMAGE_TAG)    .
+	docker buildx build --load -f Dockerfile.ha-app -t $(IMAGE_TAG_HA) .
 
-# Build for linux/amd64 + linux/arm64, exactly like CI (requires a buildx builder with multi-platform support)
+# Build both images for linux/amd64 + linux/arm64 + linux/arm/v7, exactly like CI
 docker-build-multi:
-	docker buildx build --platform linux/amd64,linux/arm64 -t $(IMAGE_TAG) .
+	docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -f Dockerfile    -t $(IMAGE_TAG)    .
+	docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -f Dockerfile.ha-app -t $(IMAGE_TAG_HA) .
 
 # Run the built image together with a Mosquitto broker for local testing
 docker-run:

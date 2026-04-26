@@ -88,3 +88,5 @@ typing-inspection==0.4.2
     #   pydantic-settings
 uvicorn==0.41.0
     # via ir2mqtt (pyproject.toml)
+websockets==16.0
+    # via ir2mqtt (pyproject.toml)
