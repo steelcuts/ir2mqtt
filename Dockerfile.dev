@@ -1,0 +1,26 @@
+# Use an official Python runtime as a parent image
+FROM python:3.12-slim
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Prevent Python from writing .pyc files
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Ensure logs are output immediately to the terminal
+ENV PYTHONUNBUFFERED=1
+
+# Install dependencies first to leverage Docker layer caching
+COPY requirements.dev.txt .
+RUN pip install --no-cache-dir -r requirements.dev.txt \
+    && rm -rf /root/.cache/pip
+
+# Copy the rest of the application's code
+# Note: In dev, this is often overwritten by the docker-compose volume mount
+COPY backend /app/backend
+
+# Expose the port the app runs on
+EXPOSE 8099
+
+# Run the application with hot-reloading
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8099", "--reload", "--reload-dir", "backend"]

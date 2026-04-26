@@ -1,0 +1,17 @@
+#!/bin/sh
+set -e
+
+# Integration E2E tests require Docker (for Mosquitto) and run on every push.
+# Skip gracefully if Docker is unavailable, but warn loudly.
+
+if [ -d "frontend" ]; then
+  if command -v docker >/dev/null 2>&1; then
+    echo "🔗 Integration E2E tests (pre-push)..."
+    make test-integration
+  else
+    echo "⚠️  Docker not found — integration E2E tests skipped."
+    echo "   Run manually before merging: make test-integration"
+  fi
+fi
+
+echo "✅ Pre-push checks passed."

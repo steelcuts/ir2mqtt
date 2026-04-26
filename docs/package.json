@@ -1,0 +1,14 @@
+{
+  "name": "ir2mqtt-docs",
+  "private": true,
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview",
+    "export-pdf": "press-export-pdf export ."
+  },
+  "devDependencies": {
+    "vitepress": "^1.6.4",
+    "vitepress-export-pdf": "^1.0.0"
+  }
+}

@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8099:8099"
+    privileged: true
+    volumes:
+      - .:/app
+      - ./data:/data
+      - /dev:/dev
+    environment:
+      - MQTT_BROKER=mqtt-broker
+      - MQTT_PORT=1883
+      - APP_ENV=development
+    depends_on:
+      - mqtt-broker
+    
+
+  frontend:
+    image: node:22-alpine
+    working_dir: /app/frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount the source code
+      - ./frontend:/app/frontend
+      # Add a named volume for node_modules to keep it inside the container
+      - node_modules:/app/frontend/node_modules
+    command: sh -c "npm install && npm run dev -- --host"
+    depends_on:
+      - backend
+
+  mqtt-broker:
+    image: eclipse-mosquitto:latest
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+volumes:
+  node_modules:
+
+networks:
+  default:
+    driver: bridge

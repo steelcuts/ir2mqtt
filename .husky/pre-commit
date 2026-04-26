@@ -1,0 +1,32 @@
+#!/bin/sh
+set -e
+
+cleanup() {
+  code=$?
+  [ $code -ne 0 ] && echo "❌ Pre-commit failed (exit $code). Commit aborted."
+}
+trap cleanup EXIT
+
+# ── Frontend: lint (auto-fix), type-check, unit tests ────────────────────────
+echo "🎨 Frontend checks..."
+make lint-frontend
+git diff --name-only --cached -- "frontend/" | xargs git add 2>/dev/null || true
+make test-frontend
+
+# ── Backend: lint (auto-fix), unit tests ─────────────────────────────────────
+echo "🐍 Backend checks..."
+make lint-backend
+git diff --name-only --cached -- "backend/" "tools/" | xargs git add 2>/dev/null || true
+make test-backend
+
+echo "🐍 Simulator checks..."
+make lint-simulator
+git diff --name-only --cached -- "tools/simulator/" | xargs git add 2>/dev/null || true
+make test-simulator
+make test-simulator-gui
+
+# ── E2E tests (mocked, no Docker needed) ─────────────────────────────────────
+echo "🎭 E2E tests..."
+make test-e2e
+
+echo "✅ All pre-commit checks passed."

@@ -1,0 +1,188 @@
+/* Custom Shepherd Theme using App CSS Variables */
+.shepherd-element {
+	background: rgb(var(--color-bg-secondary));
+	border-radius: 0.5rem;
+	border: 1px solid rgb(var(--color-border));
+	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+	max-width: 400px;
+	z-index: 100001;
+}
+.shepherd-element.shepherd-wide {
+	max-width: 600px;
+}
+.shepherd-element[data-popper-placement^='left'] {
+	margin-left: -24px;
+}
+.shepherd-element[data-popper-placement^='right'] {
+	margin-left: 24px;
+}
+.shepherd-element[data-popper-placement^='top'],.shepherd-element[data-popper-placement^='bottom'] {
+	transform: translateX(-50%);
+}
+.shepherd-header {
+	padding: 1rem 1rem 0.5rem;
+	border-bottom: 1px solid rgb(var(--color-border));
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+.shepherd-title {
+	color: rgb(var(--color-text-primary));
+	font-size: 1.1rem;
+	font-weight: bold;
+	flex: 1;
+	margin: 0;
+}
+.shepherd-cancel-icon {
+	color: rgb(var(--color-text-secondary));
+	font-size: 1.5rem;
+	cursor: pointer;
+}
+.shepherd-cancel-icon:hover {
+	color: rgb(var(--color-text-primary));
+}
+.shepherd-text {
+	padding: 1rem;
+	color: rgb(var(--color-text-secondary));
+	font-size: 0.95rem;
+	line-height: 1.5;
+}
+.shepherd-footer {
+	padding: 0 1rem 1rem;
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.5rem;
+}
+.shepherd-button {
+	background: rgb(var(--color-bg-tertiary));
+	color: rgb(var(--color-text-primary));
+	border: 1px solid rgb(var(--color-border));
+	border-radius: 0.25rem;
+	padding: 0.5rem 1rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s;
+}
+.shepherd-button:not(.shepherd-button-secondary):hover {
+	background-color: rgb(var(--color-border));
+	border-color: rgb(var(--color-text-secondary));
+}
+.shepherd-button.shepherd-button-primary {
+	background-color: rgb(var(--color-accent));
+	border-color: rgb(var(--color-accent));
+	color: white;
+}
+.shepherd-button.shepherd-button-primary:hover {
+	background-color: rgb(var(--color-accent-hover));
+	border-color: rgb(var(--color-accent-hover));
+}
+/* Arrow */
+.shepherd-arrow,.shepherd-arrow:before {
+	position: absolute;
+	width: 0;
+	height: 0;
+	z-index: 100001;
+}
+.shepherd-arrow svg {
+	display: none;
+}
+.shepherd-arrow:before {
+	content: '';
+	position: absolute;
+	border: 8px solid transparent;
+}
+.shepherd-element[data-popper-placement^='top'] > .shepherd-arrow {
+	bottom: -16px;
+}
+.shepherd-element[data-popper-placement^='top'] > .shepherd-arrow:before {
+	border-top-color: rgb(var(--color-border));
+	bottom: 1px;
+	left: -8px;
+}
+.shepherd-element[data-popper-placement^='top'] > .shepherd-arrow::after {
+	content: '';
+	position: absolute;
+	border: 7px solid transparent;
+	border-top-color: rgb(var(--color-bg-secondary));
+	bottom: 2px;
+	left: -7px;
+}
+.shepherd-element[data-popper-placement^='bottom'] > .shepherd-arrow {
+	top: -16px;
+}
+.shepherd-element[data-popper-placement^='bottom'] > .shepherd-arrow:before {
+	border-bottom-color: rgb(var(--color-border));
+	top: 1px;
+	left: -8px;
+}
+.shepherd-element[data-popper-placement^='bottom'] > .shepherd-arrow::after {
+	content: '';
+	position: absolute;
+	border: 7px solid transparent;
+	border-bottom-color: rgb(var(--color-bg-secondary));
+	top: 2px;
+	left: -7px;
+}
+.shepherd-element[data-popper-placement^='left'] > .shepherd-arrow {
+	right: -16px;
+}
+.shepherd-element[data-popper-placement^='left'] > .shepherd-arrow:before {
+	border-left-color: rgb(var(--color-border));
+	right: 1px;
+	top: -8px;
+}
+.shepherd-element[data-popper-placement^='left'] > .shepherd-arrow::after {
+	content: '';
+	position: absolute;
+	border: 7px solid transparent;
+	border-left-color: rgb(var(--color-bg-secondary));
+	right: 2px;
+	top: -7px;
+}
+.shepherd-element[data-popper-placement^='right'] > .shepherd-arrow {
+	left: -16px;
+}
+.shepherd-element[data-popper-placement^='right'] > .shepherd-arrow:before {
+	border-right-color: rgb(var(--color-border));
+	left: 1px;
+	top: -8px;
+}
+.shepherd-element[data-popper-placement^='right'] > .shepherd-arrow::after {
+	content: '';
+	position: absolute;
+	border: 7px solid transparent;
+	border-right-color: rgb(var(--color-bg-secondary));
+	left: 2px;
+	top: -7px;
+}
+.shepherd-modal-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.3);
+	z-index: 100000;
+}
+.shepherd-modal-overlay-container {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	pointer-events: none;
+	z-index: 99999;
+	overflow: hidden;
+	opacity: 0.6 !important;
+}
+
+/* Ensure the overlay blocks clicks on non-highlighted elements */
+.shepherd-modal-overlay-container svg {
+	pointer-events: none !important;
+}
+
+.shepherd-modal-overlay-container svg path {
+	pointer-events: auto !important;
+	fill: #000 !important;
+	cursor: not-allowed;
+}

@@ -1,0 +1,47 @@
+# IDE and editor files
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+tools/simulator/venv/
+.env
+.env.*
+.coverage
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+*.egg-info/
+
+# Node / Frontend
+**/node_modules/
+playwright-report/
+playwright-report-integration/
+test-results/
+coverage/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Project Specific
+/data/
+*.log
+
+# Misc
+_ 
+
+.claude/
+frontend/playwright-report-integration/index.html
+tools/simulator/simulator_config.json
+
+.pids.json
+.runtime.json
+tools/simulator/simulator_config.json
+simulator_config.json
+untranslated_strings.csv
+.vitepress

@@ -1,0 +1,11 @@
+PyQt6>=6.4,<7
+paho-mqtt==2.1.0
+pyyaml
+sqlalchemy
+aiosqlite
+pydantic
+pydantic-settings
+greenlet
+pytest
+pytest-qt
+pytest-asyncio

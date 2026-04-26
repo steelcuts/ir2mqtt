@@ -1,0 +1,44 @@
+ARG BUILD_FROM=ghcr.io/home-assistant/alpine-base:3.20
+
+# --- Frontend Build Stage ---
+FROM node:22-alpine AS builder
+
+WORKDIR /app/frontend
+
+# Copy package manifests and install dependencies cleanly
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+
+# Copy the rest of the frontend source code and build
+COPY frontend/ ./
+RUN npm run build
+
+# --- Final App Stage (Home Assistant Add-on) ---
+FROM $BUILD_FROM
+
+# Prevent Python from writing .pyc files
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Ensure logs are output immediately to the terminal
+ENV PYTHONUNBUFFERED=1
+
+# Install Python
+RUN apk add --no-cache python3 py3-pip bash
+
+WORKDIR /app
+COPY --from=builder /app/dist ./dist
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip3 install --no-cache-dir -r requirements.txt --break-system-packages
+
+# Copy config.json for version information
+COPY config.json .
+
+COPY backend /app/backend
+COPY run.sh /app/run.sh
+
+# Make run script executable
+RUN chmod a+x /app/run.sh
+
+CMD [ "/app/run.sh" ]

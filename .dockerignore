@@ -1,0 +1,60 @@
+# Version control
+.git
+.github
+.gitattributes
+
+# Dependencies
+**/node_modules
+**/venv/
+**/.venv/
+
+# Build artifacts
+**/dist
+**/build
+**/*.egg-info/
+
+# IDE and OS files
+.vscode
+.idea
+*.suo
+*.user
+*.DS_Store
+Thumbs.db
+.claude/
+
+# Python cache & tests
+**/__pycache__
+**/*.pyc
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage/
+test-results/
+playwright-report/
+playwright-report-integration/
+**/tests
+**/e2e
+pytest.ini
+
+# Development and Documentation
+docs/
+tools/
+scripts/
+mosquitto/
+Makefile
+CONTRIBUTING.md
+README.md
+requirements.dev.txt
+Dockerfile*
+docker-compose.yml
+
+# Environment variables and local data
+.env
+.env.*
+/data/
+*.db
+*.log
+.pids.json
+.runtime.json
+**/simulator_config.json
+**/simulator_config.yaml
