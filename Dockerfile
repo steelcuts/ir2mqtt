@@ -32,9 +32,6 @@ COPY --from=builder /app/dist ./dist
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy config.json for version information
-COPY config.json .
-
 # Copy migration scripts and configuration
 COPY migrations /app/migrations
 COPY alembic.ini .

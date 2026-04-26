@@ -135,7 +135,6 @@ make release VERSION=1.2.0
 ```
 
 This updates the version string in:
-- `config.json`
 - `frontend/package.json`
 - `pyproject.toml`
 

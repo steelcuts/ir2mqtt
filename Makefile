@@ -170,9 +170,8 @@ doc-gifs:
 
 release:
 	@if [ -z "$(VERSION)" ]; then echo "Error: VERSION is not set. Usage: make release VERSION=1.0.0"; exit 1; fi
-	@echo "Setting version to $(VERSION) in config.json, package.json, and pyproject.toml..."
+	@echo "Setting version to $(VERSION) in package.json, and pyproject.toml..."
 	@$(PYTHON) -c "import json, re; \
-	f='config.json'; d=json.load(open(f)); d['version']='$(VERSION)'; json.dump(d, open(f,'w'), indent=2); open(f,'a').write('\n'); \
 	f='frontend/package.json'; d=json.load(open(f)); d['version']='$(VERSION)'; json.dump(d, open(f,'w'), indent=2); open(f,'a').write('\n'); \
 	f='pyproject.toml'; c=open(f).read(); open(f,'w').write(re.sub(r'version = \".*\"', 'version = \"$(VERSION)\"', c, count=1))"
 	@echo "Versions updated successfully. Running showcase..."
