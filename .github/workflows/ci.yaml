@@ -14,8 +14,49 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
+  # ── Determine Changes ────────────────────────────────────────────────────────
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      simulator: ${{ steps.filter.outputs.simulator }}
+      e2e: ${{ steps.filter.outputs.e2e }}
+      docker: ${{ steps.filter.outputs.docker }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+              - 'pyproject.toml'
+              - 'requirements.txt'
+              - 'requirements.dev.txt'
+              - '.github/workflows/ci.yaml'
+              - 'tools/simulator/**'
+            frontend:
+              - 'frontend/**'
+              - '.github/workflows/ci.yaml'
+            simulator:
+              - 'tools/simulator/**'
+              - '.github/workflows/ci.yaml'
+            e2e:
+              - 'frontend/**'
+              - 'backend/**'
+              - 'scripts/**'
+              - '.github/workflows/ci.yaml'
+            docker:
+              - 'Dockerfile*'
+              - 'rootfs/**'
+              - 'build.yaml'
+              - '.github/workflows/ci.yaml'
+
   # ── Simulator (Qt GUI tests — needs xvfb) ───────────────────────────────────
   simulator-test:
+    needs: changes
+    if: ${{ needs.changes.outputs.simulator == 'true' }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -52,6 +93,8 @@ jobs:
 
   # ── Backend (unit tests + lint) ──────────────────────────────────────────────
   backend-test:
+    needs: changes
+    if: ${{ needs.changes.outputs.backend == 'true' }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -78,6 +121,8 @@ jobs:
 
   # ── Frontend (unit tests + lint + build) ─────────────────────────────────────
   frontend-test:
+    needs: changes
+    if: ${{ needs.changes.outputs.frontend == 'true' }}
     runs-on: ubuntu-24.04
     defaults:
       run:
@@ -109,7 +154,8 @@ jobs:
 
   # ── E2E tests (mocked — uses scripts/run-e2e.sh) ────────────────────────────
   e2e-test:
-    needs: [backend-test, frontend-test]
+    needs: [changes, backend-test, frontend-test]
+    if: always() && needs.changes.outputs.e2e == 'true' && (needs.backend-test.result == 'success' || needs.backend-test.result == 'skipped') && (needs.frontend-test.result == 'success' || needs.frontend-test.result == 'skipped')
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -132,7 +178,8 @@ jobs:
 
   # ── Integration E2E tests (real MQTT stack via Docker) ───────────────────────
   e2e-integration-test:
-    needs: [backend-test, frontend-test]
+    needs: [changes, backend-test, frontend-test]
+    if: always() && needs.changes.outputs.e2e == 'true' && (needs.backend-test.result == 'success' || needs.backend-test.result == 'skipped') && (needs.frontend-test.result == 'success' || needs.frontend-test.result == 'skipped')
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -156,8 +203,8 @@ jobs:
 
   # ── Publish Docker Image ─────────────────────────────────────────────────────
   build-and-push-image:
-    needs: [simulator-test, e2e-test, e2e-integration-test]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    needs: [changes, simulator-test, e2e-test, e2e-integration-test]
+    if: always() && github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) && needs.changes.outputs.docker == 'true' && (needs.simulator-test.result == 'success' || needs.simulator-test.result == 'skipped') && (needs.e2e-test.result == 'success' || needs.e2e-test.result == 'skipped') && (needs.e2e-integration-test.result == 'success' || needs.e2e-integration-test.result == 'skipped')
     runs-on: ubuntu-latest
     permissions:
       contents: read
