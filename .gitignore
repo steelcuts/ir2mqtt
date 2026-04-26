@@ -44,5 +44,6 @@ tools/simulator/simulator_config.json
 tools/simulator/simulator_config.json
 simulator_config.json
 untranslated_strings.csv
-.vitepress
+docs/.vitepress/dist
+docs/.vitepress/cache
 ha-app-repo/
