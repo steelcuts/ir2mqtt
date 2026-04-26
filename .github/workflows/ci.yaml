@@ -34,19 +34,15 @@ jobs:
               - 'pyproject.toml'
               - 'requirements.txt'
               - 'requirements.dev.txt'
-              - '.github/workflows/ci.yaml'
               - 'tools/simulator/**'
             frontend:
               - 'frontend/**'
-              - '.github/workflows/ci.yaml'
             simulator:
               - 'tools/simulator/**'
-              - '.github/workflows/ci.yaml'
             e2e:
               - 'frontend/**'
               - 'backend/**'
               - 'scripts/**'
-              - '.github/workflows/ci.yaml'
             docker:
               - 'Dockerfile*'
               - 'rootfs/**'
