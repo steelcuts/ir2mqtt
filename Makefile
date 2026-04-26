@@ -1,6 +1,6 @@
 .PHONY: lint lint-frontend lint-backend \
         test-backend test-frontend test-e2e test-integration test-simulator test-simulator-gui \
-        test check help dev-local dev setup update-deps clean migrate migration-create migrate-stamp migrate-check \
+        test check help dev-local dev setup install-hooks update-deps clean migrate migration-create migrate-stamp migrate-check \
         docker-build docker-build-multi docker-run docker-stop \
         showcase doc-gifs docs-pdf
 
@@ -20,7 +20,7 @@ IMAGE_TAG_HA ?= ir2mqtt-ha-app:local
 
 help:
 	@echo ""
-	@echo "  make setup             		First-time setup (venv, pip, npm, husky)"
+	@echo "  make setup             		First-time setup (venv, pip, npm, git hooks)"
 	@echo "  make update-deps       		Regenerate requirements.dev.txt for current Python version"
 	@echo "  make lint              		Lint all code (frontend + backend)"
 	@echo "  make lint-frontend     		Lint frontend only"
@@ -57,6 +57,13 @@ setup: check-env
 	.venv/bin/pip install -q -e ".[dev]"
 	cd frontend && npm install
 	cd docs && npm install
+	$(MAKE) install-hooks
+
+install-hooks:
+	@cp scripts/hooks/pre-commit .git/hooks/pre-commit
+	@cp scripts/hooks/pre-push   .git/hooks/pre-push
+	@chmod +x .git/hooks/pre-commit .git/hooks/pre-push
+	@echo "Git hooks installed (pre-commit: lint, pre-push: test-backend + test-frontend)"
 
 check-env:
 	@node -v | grep -E "v(2[2-9]|[3-9][0-9])\." > /dev/null || \
