@@ -201,6 +201,6 @@ async def get_status(request: Request = None):
 
 
 # In a development environment (using docker-compose), the frontend is served by Vite.
-# In production (like a Home Assistant addon), the backend serves the built frontend.
+# In production (like a Home Assistant app), the backend serves the built frontend.
 if os.getenv("APP_ENV") != "development" and "pytest" not in sys.modules:
     app.mount("/", StaticFiles(directory="dist", html=True), name="static")

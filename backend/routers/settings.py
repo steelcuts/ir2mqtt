@@ -262,7 +262,7 @@ async def save_mqtt_settings(
 ):
     logger.info("Request to save MQTT settings.")
 
-    # Prevent changes in supervised (HA Addon) environments where settings are from env vars
+    # Prevent changes in supervised (HA App) environments where settings are from env vars
     if "SUPERVISOR_TOKEN" in os.environ:
         logger.warning("Attempted to save MQTT settings in a supervised environment. Ignoring.")
         raise HTTPException(403, "MQTT settings are managed by the supervisor.")

@@ -183,11 +183,11 @@ The backend reads the following variables at startup (all optional in developmen
 | `DATABASE_URL` | `sqlite+aiosqlite:///./data/ir2mqtt.db` | SQLAlchemy async URL |
 | `MQTT_BROKER` | `localhost` | MQTT broker hostname |
 | `MQTT_PORT` | `1883` | MQTT broker port |
-| `APP_MODE` | `standalone` | `standalone` or `ha_addon` |
+| `APP_MODE` | `standalone` | `standalone` or `ha_app` |
 | `APP_ENV` | `production` | `development` enables auto-reload |
 | `LOG_LEVEL` | `INFO` | uvicorn / app log level |
 | `IRDB_PATH` | `./data/ir_db` | Path to the IR database files |
-| `OPTIONS_FILE` | `./data/options.yaml` | HA add-on options file path |
+| `OPTIONS_FILE` | `./data/options.yaml` | HA app options file path |
 
 In `make dev-local` and `make test-e2e` these are set automatically via the startup scripts.
 

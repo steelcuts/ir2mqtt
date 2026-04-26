@@ -1,7 +1,7 @@
 # IR2MQTT
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Home Assistant](https://img.shields.io/badge/Home%20Assistant-Add--on-blue)
+![Home Assistant](https://img.shields.io/badge/Home%20Assistant-HA--App-blue)
 ![Docker](https://img.shields.io/badge/Docker-Supported-blue)
 
 **The Ultimate IR Gateway for Smart Homes & MQTT.**
@@ -24,11 +24,11 @@ For details on ESPHome bridge setup please see the **[ir2mqtt_bridge Repository]
 
 ## Quick Start
 
-### Option 1: Home Assistant Add-on
+### Option 1: Home Assistant App
 
-[![Open your Home Assistant instance and show the add add-on repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fsteelcuts%2Fir2mqtt-addon)
+[![Open your Home Assistant instance and show the add add-on repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fsteelcuts%2Fir2mqtt-ha-app)
 
-1. Click the button above to add the repository, or manually go to **Settings → Add-ons → Add-on Store → ⋮ → Repositories** and add `https://github.com/steelcuts/ir2mqtt-addon`.
+1. Click the button above to add the repository, or manually go to **Settings → Add-ons → Add-on Store → ⋮ → Repositories** and add `https://github.com/steelcuts/ir2mqtt-ha-app`.
 2. Find **IR2MQTT** in the store and click **Install**.
 3. In the **Configuration** tab, enter your MQTT broker details.
 4. Click **Start** and open the Web UI.
