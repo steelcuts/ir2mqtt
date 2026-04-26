@@ -26,9 +26,9 @@ For details on ESPHome bridge setup please see the **[ir2mqtt_bridge Repository]
 
 ### Option 1: Home Assistant Add-on
 
-[![Open your Home Assistant instance and show the add add-on repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fsteelcuts%2Fir2mqtt)
+[![Open your Home Assistant instance and show the add add-on repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fsteelcuts%2Fir2mqtt-addon)
 
-1. Click the button above to add the repository, or manually go to **Settings → Add-ons → Add-on Store → ⋮ → Repositories** and add this repository's URL.
+1. Click the button above to add the repository, or manually go to **Settings → Add-ons → Add-on Store → ⋮ → Repositories** and add `https://github.com/steelcuts/ir2mqtt-addon`.
 2. Find **IR2MQTT** in the store and click **Install**.
 3. In the **Configuration** tab, enter your MQTT broker details.
 4. Click **Start** and open the Web UI.

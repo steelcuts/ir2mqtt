@@ -2,7 +2,6 @@ import asyncio
 import json
 import os
 from collections import Counter
-from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
@@ -53,15 +52,7 @@ class LogLevelPayload(BaseModel):
 
 @router.get("/settings/app", response_model=AppModeResponse)
 async def get_app_mode(settings: SettingsDep):
-    # Try to read version from config.json in project root
-    version = "unknown"
-    config_path = Path(__file__).parent.parent.parent / "config.json"
-    if config_path.exists():
-        try:
-            with open(config_path, encoding="utf-8") as f:
-                version = json.load(f).get("version", "unknown")
-        except Exception:
-            pass
+    version = os.environ.get("APP_VERSION", "unknown")
 
     return AppModeResponse(
         mode=settings.app_mode,

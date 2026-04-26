@@ -16,6 +16,9 @@ RUN npm run build
 # --- Final App Stage (Home Assistant Add-on) ---
 FROM $BUILD_FROM
 
+ARG APP_VERSION=dev
+ENV APP_VERSION=${APP_VERSION}
+
 # Prevent Python from writing .pyc files
 ENV PYTHONDONTWRITEBYTECODE=1
 
@@ -31,9 +34,6 @@ COPY --from=builder /app/dist ./dist
 # Install Python dependencies
 COPY requirements.txt .
 RUN pip3 install --no-cache-dir -r requirements.txt --break-system-packages
-
-# Copy config.json for version information
-COPY config.json .
 
 COPY backend /app/backend
 COPY run.sh /app/run.sh
