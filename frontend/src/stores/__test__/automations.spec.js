@@ -131,7 +131,9 @@ describe('Automations Store', () => {
 
     // --- device_inactivity ---
 
-    it('handleInactivityState: stores armed state', () => {
+    it('handleInactivityState: stores armed state using frontend clock', () => {
+        const fakeNow = 5000000;
+        vi.spyOn(Date, 'now').mockReturnValueOnce(fakeNow * 1000);
         store.handleInactivityState({
             id: 'a1', trigger_index: 0,
             state: 'armed', timeout_s: 30, armed_at: 1000
@@ -140,10 +142,12 @@ describe('Automations Store', () => {
         expect(s).toBeDefined();
         expect(s.state).toBe('armed');
         expect(s.timeout_s).toBe(30);
-        expect(s.armed_at).toBe(1000);
+        expect(s.armed_at).toBe(fakeNow);
     });
 
-    it('handleInactivityState: stores cooldown state', () => {
+    it('handleInactivityState: stores cooldown state using frontend clock', () => {
+        const fakeNow = 5000000;
+        vi.spyOn(Date, 'now').mockReturnValueOnce(fakeNow * 1000);
         store.handleInactivityState({
             id: 'a1', trigger_index: 1,
             state: 'cooldown', cooldown_s: 10, cooldown_until: 9999
@@ -151,7 +155,7 @@ describe('Automations Store', () => {
         const s = store.getInactivityState('a1', 1);
         expect(s.state).toBe('cooldown');
         expect(s.cooldown_s).toBe(10);
-        expect(s.cooldown_until).toBe(9999);
+        expect(s.cooldown_until).toBe(fakeNow + 10);
     });
 
     it('handleInactivityState: idle removes entry from map', () => {
