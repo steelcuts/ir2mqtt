@@ -217,12 +217,16 @@ export const useAutomationsStore = defineStore('automations', () => {
         if (msg.state === 'idle') {
             inactivityStates.delete(key);
         } else {
+            const frontendNow = Date.now() / 1000;
             inactivityStates.set(key, {
                 state: msg.state,
                 timeout_s: msg.timeout_s,
-                armed_at: msg.armed_at,
+                // Use frontend clock to avoid clock-skew between backend and browser
+                armed_at: msg.state === 'armed' ? frontendNow : msg.armed_at,
                 cooldown_s: msg.cooldown_s,
-                cooldown_until: msg.cooldown_until,
+                cooldown_until: msg.state === 'cooldown' && msg.cooldown_s != null
+                    ? frontendNow + msg.cooldown_s
+                    : msg.cooldown_until,
             });
         }
     };

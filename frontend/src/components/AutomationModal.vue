@@ -664,7 +664,7 @@ const isValid = computed(() => !validationError.value);
                 <summary class="text-xs font-medium text-gray-400 p-3 cursor-pointer select-none hover:text-gray-200 transition-colors">
                   <i class="mdi mdi-tune-variant mr-1" />{{ t('automations.modal.inactivityAdvanced') }}
                 </summary>
-                <div class="p-3 pt-0 space-y-4 border-t border-gray-700 mt-0">
+                <div class="p-3 space-y-4 border-t border-gray-700 mt-0">
                   <!-- Button whitelist -->
                   <div v-if="trigger.device_id">
                     <label class="block text-xs font-medium text-gray-300 mb-1">{{ t('automations.modal.inactivityButtonFilter') }}</label>
