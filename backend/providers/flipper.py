@@ -130,6 +130,12 @@ class FlipperProvider(IrRepoProvider):
                 payload["timings"] = [int(x) for x in raw_str.split()]
             except Exception:
                 return
+            try:
+                freq = int(btn_data["frequency"])
+                if freq != 38000:
+                    payload["frequency"] = freq
+            except (KeyError, ValueError):
+                pass
         else:
             if protocol == "samsung" and "data" not in btn_data and "address" in btn_data:
                 addr = flipper_hex_to_int(btn_data.get("address", "0"))
