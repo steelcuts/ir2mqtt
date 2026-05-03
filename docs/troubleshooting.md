@@ -25,7 +25,7 @@ IR2MQTT reads credentials from `/data/options.json` (managed by the HA Superviso
 - **Wrong protocol:** If a device doesn't respond to learned codes, try disabling all protocols except the one you expect (e.g. NEC for most TVs) on the Bridge settings page.
 - **Echo suppression blocking codes:** If a button triggers correctly the first time but not immediately after, echo suppression may be too aggressive. Reduce the timeout or disable **Ignore Others** in the bridge settings.
 - **RAW codes unreliable:** RAW captures are sensitive to timing. Use **Smart Learning** (multiple presses) to get a more consistent signal. If it still fails, try capturing from a shorter distance.
-- **RC5 protocol:** RC5 is currently broken in ESPHome upstream. Use RAW as a workaround for RC5 devices.
+- **Protocol not learning / wrong codes:** The carrier frequency may not match your receiver module. RC5 and RC6 use 36 kHz, Sony uses 40 kHz, Dish uses 57.6 kHz — a standard 38 kHz module will struggle outside its range. See the [protocol frequency table](/bridge-component#carrier-frequencies) for the full list. Try holding the remote closer, or fall back to **RAW**.
 
 ## Home Assistant Integration
 
@@ -37,7 +37,7 @@ IR2MQTT reads credentials from `/data/options.json` (managed by the HA Superviso
 ## Bridge / Hardware Issues
 
 :::tip Loopback test
-Use the **Diagnostics → Loopback Test** on the Bridges page to verify your hardware. It sends a test code and checks if the receiver picks it up — great for confirming TX/RX wiring.
+Use the **Loopback Test** card on the **Settings** page to verify your hardware. It sends a test code and checks if the receiver picks it up — great for confirming TX/RX wiring.
 :::
 
 - **Bridge discovered but immediately goes offline:** Check power supply stability on the ESP32. Brownouts during IR transmission are common with weak USB power.

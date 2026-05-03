@@ -3,37 +3,36 @@
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-HA--App-blue)
 ![Docker](https://img.shields.io/badge/Docker-Supported-blue)
+[![Hackaday](https://img.shields.io/badge/Hackaday-Featured-05979f)](https://hackaday.com/2026/05/02/ir-device-control-that-lives-off-the-cloud)
 
 **The Ultimate IR Gateway for Smart Homes & MQTT.**
 
 ![IR2MQTT Demo](.github/assets/showcase.gif)
 
-IR2MQTT bridges the gap between physical Infrared devices and your smart home. It replaces tedious YAML configuration with a modern, reactive Web UI to manage devices, learn IR codes, and create powerful automations.
+IR2MQTT bridges the gap between physical Infrared devices and your smart home. It replaces tedious YAML configuration with a modern, reactive Web UI to manage devices, learn IR codes, and create powerful automations — entirely local, no cloud, no account, no subscriptions.
 
 ---
 
-## Documentation & Manual
+## Documentation
 
-For full details on features, configuration, MQTT topics, and development instructions, please visit the **[IR2MQTT Documentation](https://steelcuts.github.io/ir2mqtt/)** or read the Markdown files in the `docs/` folder.
+Full documentation — hardware setup, wiring, ESPHome bridge component, MQTT reference, automations, and more — is available at:
 
-For details on ESPHome bridge setup please see the **[ir2mqtt_bridge Repository](https://github.com/steelcuts/ir2mqtt_bridge)**.
-
-
+**[steelcuts.github.io/ir2mqtt](https://steelcuts.github.io/ir2mqtt/)**
 
 ---
 
 ## Quick Start
 
-### Option 1: Home Assistant App
+### Option 1: Home Assistant Add-on
 
 [![Open your Home Assistant instance and show the add add-on repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fsteelcuts%2Fir2mqtt-ha-app)
 
-1. Click the button above to add the repository, or manually go to **Settings → Add-ons → Add-on Store → ⋮ → Repositories** and add `https://github.com/steelcuts/ir2mqtt-ha-app`.
+1. Click the button above to add the repository, or go to **Settings → Add-ons → Add-on Store → ⋮ → Repositories** and add `https://github.com/steelcuts/ir2mqtt-ha-app`.
 2. Find **IR2MQTT** in the store and click **Install**.
-3. In the **Configuration** tab, enter your MQTT broker details.
+3. Enter your MQTT broker details in the **Configuration** tab.
 4. Click **Start** and open the Web UI.
 
-### Option 2: Docker (Standalone)
+### Option 2: Docker
 
 ```yaml
 services:
@@ -51,7 +50,7 @@ services:
     volumes:
       - ./data:/data
     devices:
-      - /dev/ttyUSB0:/dev/ttyUSB0 # Adjust to your serial device
+      - /dev/ttyUSB0:/dev/ttyUSB0  # optional: serial bridge
 ```
 
 ```bash
@@ -60,14 +59,6 @@ docker-compose up -d
 ```
 
 ---
-
-## Resources
-
-- [ESPHome Documentation](https://esphome.io)
-- [Home Assistant MQTT Integration](https://www.home-assistant.io/integrations/mqtt/)
-- [Flipper-IRDB](https://github.com/logickworkshop/Flipper-IRDB)
-- [Probono IRDB](https://github.com/probonopd/irdb)
-- [Mosquitto MQTT Broker](https://mosquitto.org)
 
 ## License
 

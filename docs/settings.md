@@ -1,7 +1,7 @@
 # Settings
 
 ## UI Settings
-- **Language & Theme:** Choose your preferred display language and color scheme (Dark, Gray, Light).
+- **Language & Theme:** Choose your preferred display language and color scheme (Dark, Home Assistant, Light).
 - **View Mode:** The Devices page can be toggled between Compact, Normal, and Large layouts using the view icons in the top bar.
 - **Indications:** Enable visual feedback (flashing) when codes are received or automations run. You can also optionally flash codes that were blocked by echo suppression.
 

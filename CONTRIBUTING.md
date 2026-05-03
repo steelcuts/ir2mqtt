@@ -31,6 +31,6 @@ If you want to contribute code:
 I will review your PR when I have time. Please understand that I might request changes or decide not to merge a PR if it doesn't align with the project's goals or adds too much maintenance burden.
 
 ## Local Development
-For instructions on how to set up the development environment, please refer to the `Development` section in the [Manual](docs/MANUAL.md).
+For instructions on how to set up the development environment, please refer to the [Local Setup & Architecture](docs/dev-setup.md) page in the documentation.
 
 Thank you for your support and understanding!

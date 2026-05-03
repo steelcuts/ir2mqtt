@@ -1,9 +1,19 @@
 import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid'
 
-export default defineConfig({
+export default withMermaid(defineConfig({
   title: 'IR2MQTT',
   description: 'The Ultimate IR Gateway',
   base: '/ir2mqtt/',
+  mermaid: {},
+  vite: {
+    ssr: {
+      noExternal: ['vitepress-plugin-mermaid', 'mermaid'],
+    },
+    optimizeDeps: {
+      include: ['mermaid'],
+    },
+  },
   themeConfig: {
     nav: [
       { text: 'Guide', link: '/devices' },
@@ -14,6 +24,7 @@ export default defineConfig({
         text: 'Setup Guide',
         items: [
           { text: 'Hardware Setup & Installation', link: '/hardware-setup' },
+          { text: 'ir2mqtt_bridge Component', link: '/bridge-component' },
         ],
       },
       {
@@ -49,4 +60,4 @@ export default defineConfig({
       { icon: 'github', link: 'https://github.com/steelcuts/ir2mqtt' },
     ],
   },
-})
+}))

@@ -49,6 +49,15 @@ Common use cases you can build with automations.
 | Trigger | Multi Press — `TV / Power`, count: **2**, window: 800 ms |
 | Action | Fire Event — name: `living_room_light_toggle` |
 
+```mermaid
+flowchart LR
+    A([IR: TV / Power]) --> B[Counter +1]
+    B --> C{Count = 2\nwithin 800 ms?}
+    C -- No --> D([Wait — timeout resets counter])
+    C -- Yes --> E([Fire Event: living_room_light_toggle])
+    E --> F([HA toggles light])
+```
+
 In Home Assistant, create an automation triggered by the MQTT device trigger `living_room_light_toggle` on the IR2MQTT device.
 
 ---
@@ -65,6 +74,15 @@ In Home Assistant, create an automation triggered by the MQTT device trigger `li
 | 4 | Delay — 1500 ms |
 | 5 | Send IR — `Soundbar / HDMI 1` |
 
+```mermaid
+flowchart TD
+    A([Trigger]) --> B[Send IR: TV / Power]
+    B --> C[Delay 3000 ms]
+    C --> D[Send IR: Soundbar / Power]
+    D --> E[Delay 1500 ms]
+    E --> F([Send IR: Soundbar / HDMI 1])
+```
+
 :::tip Parallel Execution
 Disable **Parallel Execution** for this automation so that rapid button presses don't stack multiple blasts on top of each other.
 :::
@@ -79,6 +97,19 @@ Disable **Parallel Execution** for this automation so that rapid button presses 
 |-------|-------|
 | Trigger | Sequence — `Up`, `Up`, `Down`, `Down` |
 | Action | Fire Event — name: `alarm_toggle` |
+
+```mermaid
+flowchart LR
+    A([IR received]) --> B{Up?}
+    B -- No\nStrict: reset --> A
+    B -- Yes --> C{Up?}
+    C -- No\nStrict: reset --> A
+    C -- Yes --> D{Down?}
+    D -- No\nStrict: reset --> A
+    D -- Yes --> E{Down?}
+    E -- No\nStrict: reset --> A
+    E -- Yes --> F([Fire Event: alarm_toggle])
+```
 
 :::tip Strict Mode
 Enable **Strict Mode** on the trigger so that pressing any other button resets the sequence progress. This prevents accidental triggers.
@@ -126,6 +157,15 @@ In Home Assistant, handle `scene_good_night` to dim lights, lock doors, and set 
 | Ignore Own Actions | Enabled — so the "Display Off" send does not reset the timer |
 | Action | Send IR — `AVR / Display Off` |
 
+```mermaid
+flowchart TD
+    A([First IR activity on AVR]) --> B[Start 30s timer]
+    B --> C{Activity\nbefore timeout?}
+    C -- Yes: reset timer --> B
+    C -- No: timeout --> D[Send IR: AVR / Display Off]
+    D -- Rearm: always --> B
+```
+
 :::tip Ignore Own Actions
 Keep **Ignore Own Actions** enabled. Without it, sending "Display Off" would count as activity and immediately restart the 30-second countdown, causing the timer to loop forever.
 :::
@@ -144,6 +184,15 @@ Keep **Ignore Own Actions** enabled. Without it, sending "Display Off" would cou
 | Require Initial Activity | Enabled — only start the timer after the projector was actually used |
 | Action | Send IR — `Projector / Power` |
 
+```mermaid
+flowchart TD
+    A([Waiting for first\nProjector activity]) --> B[Start 2h timer]
+    B --> C{IR sent to\nProjector?}
+    C -- Yes: reset timer --> B
+    C -- No: 2h elapsed --> D([Send IR: Projector / Power])
+    D -- Rearm: never --> E([Done — disarmed])
+```
+
 ---
 
 ### Notify on Idle Device
@@ -156,3 +205,13 @@ Keep **Ignore Own Actions** enabled. Without it, sending "Display Off" would cou
 | Watch Mode | `received` |
 | Rearm Mode | `cooldown`, cooldown: **60 s** |
 | Action | Fire Event — name: `media_player_idle` |
+
+```mermaid
+flowchart TD
+    A([First IR received from\nMedia Player]) --> B[Start 5 min timer]
+    B --> C{IR received?}
+    C -- Yes: reset timer --> B
+    C -- No: timeout --> D([Fire Event: media_player_idle])
+    D --> E[Cooldown 60 s]
+    E --> B
+```

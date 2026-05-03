@@ -19,8 +19,8 @@ Each button can be configured to perform different roles within the system.
   - **Smart:** Requires multiple presses to find the most consistent signal (filters out noise). Recommended for noisy environments.
 - **Protocols:** Supports standard protocols (NEC, Sony, Samsung, RC5/6) and RAW data.
 
-:::warning RC5 protocol
-RC5 is currently broken in ESPHome (upstream issue). Use **RAW** as a workaround for RC5 devices until the ESPHome fix is released.
+:::tip Non-standard carrier frequencies
+Some protocols (RC5, RC6 at 36 kHz — Sony at 40 kHz — Dish at 57.6 kHz) use a different carrier than the standard 38 kHz. A 38 kHz receiver module will pick up nearby frequencies with reduced sensitivity — try holding the remote closer. For protocols far outside that range, a matching receiver is needed. See the [protocol frequency table](/bridge-component#carrier-frequencies).
 :::
 
 :::tip Dish protocol

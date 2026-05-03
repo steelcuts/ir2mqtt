@@ -191,7 +191,7 @@ release:
 
 docs-dev:
 	@echo "Starting local VitePress documentation server..."
-	@npx vitepress dev docs
+	@cd docs && npm run dev
 
 docs-pdf:
 	@scripts/generate-docs-pdf.sh

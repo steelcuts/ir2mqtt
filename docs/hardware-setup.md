@@ -152,7 +152,9 @@ Buy a **ESP32 DevKit v1** (also sold as "NodeMCU-32S"). It costs ~€3–5, is b
 
 ### What about the original ESP8266?
 
-The ESP8266 (NodeMCU, Wemos D1 Mini) does **not** have RMT hardware. IR support in ESPHome is software-based and much less reliable. **Do not use an ESP8266** for this project — IR decoding will drop pulses under load.
+The ESP8266 (NodeMCU, Wemos D1 Mini) does **not** have RMT hardware. ESPHome does support IR on the ESP8266, but falls back to software-based interrupt handling instead of dedicated hardware. The WiFi stack can preempt these interrupts, causing missed pulses — especially during IR reception. Transmitting usually works, but reliable decoding is not guaranteed. The ESP8266 is **not recommended** as a WiFi or MQTT bridge; use any ESP32 variant instead.
+
+As a **serial (USB) bridge**, however, the situation improves: you can disable WiFi entirely in the ESPHome config, which eliminates the main source of interrupt interference. IR reception is noticeably more reliable in this mode. It is still software-based and not as solid as hardware RMT, but usable if an ESP32 is not available.
 
 ---
 
@@ -215,9 +217,7 @@ Example: 3.3V supply, 20 mA (safe for direct GPIO drive)
 
 **Direct GPIO drive (simple, short range):**
 
-```
-ESP32 GPIO ──── 100 Ω ──── IR LED (anode) ──── GND (cathode)
-```
+![Direct GPIO drive: Wemos C3 Mini, D10 via 100 Ω to IR LED](/images/wiring/direct-drive.png)
 
 This is the easiest circuit. The LED will draw about 20 mA — within the GPIO current limit. Range is typically 3–5 metres with a good LED pointed at the device.
 
@@ -234,112 +234,218 @@ This is the easiest circuit. The LED will draw about 20 mA — within the GPIO c
 
 For longer range (5–10+ metres) or when you need to cover a large room, use a **transistor amplifier circuit** that lets you drive the LED at much higher current (100–500 mA peak):
 
-```
-                      VCC (3.3 V / 5 V)
-                        │
-                        R1
-                      33–47 Ω
-                        │
-                        │
-                      ┌─┴─┐
-                      │▶│ │   D1
-                      └─┬─┘   IR LED (940 nm)
-                        │
-                        │
-                        │
-                        │ C
-                      ┌─┴─┐
-                      │   │
-GPIO ── R2 1 kΩ ──────┤ B │   Q1
-                      │   │   NPN (2N2222 / BC547)
-                      └─┬─┘
-                        │ E
-                        │
-                       ─┴─
-                       GND
-```
+![High-power IR transmitter circuit with NPN transistor](/images/wiring/amplifier-circuit.png)
 
-**How it works:** When the ESP32 GPIO goes HIGH, a small base current (~3 mA) flows through the 1 kΩ resistor into pin B. This turns the transistor on, closing the path from C to E. Current can now flow from VCC through the resistor and LED, into the collector (C), and out the emitter (E) to GND.
+The pin numbers shown in the diagram refer to the physical legs of the transistor: **pin 1 = C (Collector)**, **pin 2 = B (Base)**, **pin 3 = E (Emitter)**.
+
+**How it works:** When the ESP32 GPIO goes HIGH, a small base current (~3 mA) flows through the 1 kΩ resistor into pin 2 (B). This turns the transistor on, closing the path from pin 1 (C) to pin 3 (E). Current can now flow from VCC through the resistor and LED, into the collector, and out the emitter to GND.
 
 The GPIO never drives the LED directly — it only controls the transistor gate. At 3.3 V with a 33 Ω resistor: `I = (3.3 − 1.35) / 0.033 ≈ 59 mA` — nearly three times more than direct GPIO drive, at essentially no risk to the ESP32.
 
-:::tip Multiple LEDs in series
-For even broader coverage, wire 2–3 IR LEDs in series. Each additional LED in the chain drops ~1.2–1.35V. With 5V supply and 3 LEDs in series: `Vdrop = 3 × 1.35 = 4.05V`, leaving only `5 - 4.05 = 0.95V` across the resistor. Use a small resistor (10–22 Ω) in this case.
-:::
+### Multiple IR LEDs for wider coverage
+
+If a single LED doesn't cover the whole room, you can wire multiple LEDs — either in **series** or in **parallel with individual resistors**. Both circuits require a 5V supply and the transistor amplifier above.
+
+**Option A — Series (3 LEDs, 1 resistor):**
+
+Three LEDs in a chain. Each LED drops ~1.35V, so total `Vdrop = 3 × 1.35 = 4.05V`, leaving ~0.95V across the 10 Ω resistor. The same current flows through all LEDs — simple wiring, slightly lower current than parallel.
+
+![3× IR LEDs in series with 10 Ω resistor at 5V](/images/wiring/amplifier-circuit-series.png)
+
+**Option B — Parallel with individual resistors (3 LEDs, 3 resistors):**
+
+Each LED has its own 10 Ω resistor. All branches are connected in parallel. Current is shared independently per LED, so each LED runs at full brightness regardless of minor differences between them. More wiring, but more consistent output and wider spread if LEDs point in different directions.
+
+![3× IR LEDs in parallel, each with 10 Ω resistor at 5V](/images/wiring/amplifier-circuit-paralell-series.png)
 
 ---
 
 ## Wiring Guide
 
+All examples use an **ESP32 DevKit v1** (or NodeMCU-32S). The GPIO numbers are suggestions — adjust them freely and update the ESPHome YAML to match.
+
 ### Minimal setup: 1× Receiver + 1× Transmitter
 
-The following example uses a **ESP32 DevKit v1** with GPIO pins that work well on most boards. You can change them to any free GPIO in the ESPHome config.
+![Wiring: 1× IR receiver + 1× IR LED](/images/wiring/simple.png)
 
+| Component | Pin | ESP32 pin |
+|-----------|-----|-----------|
+| TSOP38238 | VCC | 3.3V |
+| TSOP38238 | GND | GND |
+| TSOP38238 | DAT | GPIO 4 |
+| IR LED | Anode (+, long leg) | GPIO 13 via 100 Ω |
+| IR LED | Cathode (−, short leg) | GND |
+
+::: details ESPHome configuration snippet
+```yaml
+external_components:
+  - source:
+      type: git
+      url: https://github.com/steelcuts/ir2mqtt_bridge
+      ref: main
+    components: [ir2mqtt_bridge]
+
+remote_receiver:
+  id: rx1
+  pin:
+    number: GPIO4
+    inverted: true
+    mode: INPUT_PULLUP
+  rmt_symbols: 64
+
+remote_transmitter:
+  id: tx1
+  pin: GPIO13
+  carrier_duty_percent: 50%
+  non_blocking: true
+  rmt_symbols: 64
+
+ir2mqtt_bridge:
+  receivers: [rx1]
+  transmitters: [tx1]
+  device_id: "my-bridge"
 ```
-                        ┌─────────────────────────────────┐
-                        │        ESP32 DevKit v1          │
-                        │                                 │
-  TSOP38238 (Receiver)  │                                 │
-  ┌────────────────┐    │  GPIO 14 ◄─────────── OUT       │
-  │  VCC  GND OUT  │    │  3.3V  ──────────────── VCC     │
-  └────────────────┘    │  GND   ──────────────── GND     │
-         │  │  │        │                                 │
-                        │                                 │
-  IR LED (Transmitter)  │                                 │
-  [GPIO] ── 100Ω ── LED+│  GPIO 27 ──── 100Ω ──── LED+   │
-  [GND]  ────────── LED-│  GND    ─────────────── LED-   │
-                        │                                 │
-                        └─────────────────────────────────┘
-```
-
-**Suggested GPIO assignments:**
-
-| Component | GPIO | Notes |
-|-----------|------|-------|
-| IR Receiver (signal out) | GPIO 14 | Input-capable, no special restrictions |
-| IR LED (transmitter) | GPIO 27 | Output-capable |
-| WS2812 Status LED | GPIO 16 | Output-capable |
-
-:::tip Which GPIOs to avoid
-- **GPIO 0, 2, 12, 15** — Bootstrap pins. They affect boot mode if held HIGH or LOW during reset. Avoid for IR. Use them only if you know what you are doing.
-- **GPIO 34, 35, 36, 39** — Input-only, no internal pull-up. Fine for the receiver signal, but you may need an external 10 kΩ pull-up resistor if your receiver module does not include one.
-- **GPIO 6–11** — Connected to the internal SPI flash. **Never use these.**
 :::
 
-### Adding a WS2812 status LED
+### With optional WS2812B status LED
 
-The status LED is optional but very helpful for seeing what the bridge is doing at a glance (see [Status LED colors](#bridges)).
+![Wiring: 1× IR receiver + 1× IR LED + WS2812B](/images/wiring/statusled.png)
 
+| Component | Pin | ESP32 pin |
+|-----------|-----|-----------|
+| TSOP38238 | VCC | 3.3V |
+| TSOP38238 | GND | GND |
+| TSOP38238 | DAT | GPIO 4 |
+| IR LED | Anode (+, long leg) | GPIO 13 via 100 Ω |
+| IR LED | Cathode (−, short leg) | GND |
+| WS2812B | VCC | 5V |
+| WS2812B | GND | GND |
+| WS2812B | DIN | GPIO 12 |
+
+> A WS2812 uses **one RMT TX channel** — keep this in mind if you plan multiple transmitters (see [RMT Symbol Limit Explained](#rmt-symbol-limit-explained)).
+
+::: details ESPHome configuration snippet
+```yaml
+external_components:
+  - source:
+      type: git
+      url: https://github.com/steelcuts/ir2mqtt_bridge
+      ref: main
+    components: [ir2mqtt_bridge]
+
+remote_receiver:
+  id: rx1
+  pin:
+    number: GPIO4
+    inverted: true
+    mode: INPUT_PULLUP
+  rmt_symbols: 64
+
+remote_transmitter:
+  id: tx1
+  pin: GPIO13
+  carrier_duty_percent: 50%
+  non_blocking: true
+  rmt_symbols: 64
+
+light:
+  - platform: esp32_rmt_led_strip
+    id: status_light
+    internal: true
+    rgb_order: GRB
+    chipset: WS2812
+    pin: GPIO12
+    num_leds: 1
+    name: "IR Bridge Status LED"
+
+ir2mqtt_bridge:
+  receivers: [rx1]
+  transmitters: [tx1]
+  status_led: status_light
+  device_id: "my-bridge"
 ```
-ESP32 GPIO 16 ──── DIN of WS2812
-ESP32 3.3V/5V ──── VCC of WS2812
-ESP32 GND ─────── GND of WS2812
+:::
+
+### Multi-room: 2× Receiver + 2× Transmitter
+
+![Wiring: 2× IR receivers + 2× IR LEDs](/images/wiring/multi.png)
+
+| Component | Pin | ESP32 pin |
+|-----------|-----|-----------|
+| TSOP38238 #1 | VCC | 3.3V |
+| TSOP38238 #1 | GND | GND |
+| TSOP38238 #1 | DAT | GPIO 4 |
+| TSOP38238 #2 | VCC | 3.3V |
+| TSOP38238 #2 | GND | GND |
+| TSOP38238 #2 | DAT | GPIO 16 / RX2 |
+| IR LED #1 | Anode (+) | GPIO 13 via 100 Ω |
+| IR LED #1 | Cathode (−) | GND |
+| IR LED #2 | Anode (+) | GPIO 14 via 100 Ω |
+| IR LED #2 | Cathode (−) | GND |
+
+This uses **2 RX + 2 TX** channels = 4 of 8 available RMT channels.
+
+::: details ESPHome configuration snippet
+```yaml
+external_components:
+  - source:
+      type: git
+      url: https://github.com/steelcuts/ir2mqtt_bridge
+      ref: main
+    components: [ir2mqtt_bridge]
+
+remote_receiver:
+  - id: rx1
+    pin:
+      number: GPIO4
+      inverted: true
+      mode: INPUT_PULLUP
+    rmt_symbols: 64
+  - id: rx2
+    pin:
+      number: GPIO16
+      inverted: true
+      mode: INPUT_PULLUP
+    rmt_symbols: 64
+
+remote_transmitter:
+  - id: tx1
+    pin: GPIO13
+    carrier_duty_percent: 50%
+    non_blocking: true
+    rmt_symbols: 64
+  - id: tx2
+    pin: GPIO14
+    carrier_duty_percent: 50%
+    non_blocking: true
+    rmt_symbols: 64
+
+ir2mqtt_bridge:
+  receivers: [rx1, rx2]
+  transmitters: [tx1, tx2]
+  device_id: "my-bridge"
 ```
+:::
 
-A single WS2812B or NeoPixel LED on a breakout board (e.g. Adafruit "NeoPixel Jewel" or a bare WS2812B SMD on a carrier board) is all you need.
+:::tip Which GPIOs to avoid — by ESP32 variant
 
-> **Important:** A WS2812 LED consumes **one RMT TX channel**. Factor this into your channel budget if you plan to use multiple transmitters (see [RMT Symbol Limit Explained](#rmt-symbol-limit-explained)).
+**ESP32 (original / WROOM / DevKit)**
+- **GPIO 6–11** — Internal SPI flash. **Never use.**
+- **GPIO 34, 35, 36, 39** — Input-only, no internal pull-up. Fine for receivers, but add an external 10 kΩ pull-up if your module doesn't include one. Cannot be used for TX.
+- **GPIO 0, 2, 12, 15** — Strapping pins. Affect boot mode if driven HIGH or LOW at reset. Avoid for IR.
 
-### Two receivers + two transmitters
+**ESP32-S2 / S3**
+- **GPIO 26–32** (S2) or **GPIO 27–32** (S3) — Internal flash/PSRAM on most modules. Check your board's schematic.
+- **GPIO 0** — Strapping pin (boot mode). Avoid.
+- All remaining GPIOs are bidirectional — no input-only restriction like on the original ESP32.
 
-```
-Receiver 1 (e.g. pointed at the lounge area):
-  TSOP38238 OUT ──── GPIO 14
+**ESP32-C3**
+- **GPIO 11–17** — Internal flash on most modules. Check your board.
+- **GPIO 2, 8, 9** — Strapping pins. Avoid.
+- Only 2 RMT channels total (1 RX + 1 TX) — plan accordingly.
 
-Receiver 2 (e.g. pointed at the other side of the room):
-  TSOP38238 OUT ──── GPIO 25
-
-Transmitter 1 (left side of TV rack):
-  100Ω ──── IR LED ──── GPIO 27
-
-Transmitter 2 (right side of TV rack):
-  100Ω ──── IR LED ──── GPIO 26
-
-Status LED:
-  WS2812B DIN ──── GPIO 16
-```
-
-This uses 2 RX channels, 3 TX channels (2 IR + 1 WS2812), totalling 5 of the 8 available RMT channels. Still within limits.
+When in doubt, consult the official datasheet or your board's pinout diagram before wiring.
+:::
 
 ---
 
@@ -472,18 +578,16 @@ remote_receiver:
   id: rx1
   pin:
     number: GPIO14
-    inverted: true      # TSOP outputs active-low signal
-    mode:
-      input: true
-      pullup: true      # Enable internal pull-up (check if your module has one)
-  rmt_symbols: 64       # Reduce from default 192 to save RMT channels
-  dump: []              # Disable built-in protocol dump to avoid log spam
+    inverted: true
+    mode: INPUT_PULLUP
+  rmt_symbols: 64
 
 # IR Transmitter on GPIO 27
 remote_transmitter:
   id: tx1
   pin: GPIO27
-  carrier_duty_percent: 50   # 50% duty cycle = standard for IR
+  carrier_duty_percent: 50%
+  non_blocking: true
   rmt_symbols: 64
 
 # The ir2mqtt_bridge component
@@ -556,7 +660,7 @@ remote_receiver:
     mode:
       input: true
   rmt_symbols: 64
-  dump: []
+
 
 remote_transmitter:
   id: tx1
@@ -638,7 +742,7 @@ remote_receiver:
       input: true
       pullup: true
   rmt_symbols: 64
-  dump: []
+
 
 remote_transmitter:
   id: tx1
@@ -704,7 +808,7 @@ remote_receiver:
       inverted: true
       mode: { input: true, pullup: true }
     rmt_symbols: 64
-    dump: []
+  
 
 # Receiver 2: front-right of the room
   - id: rx2
@@ -713,7 +817,7 @@ remote_receiver:
       inverted: true
       mode: { input: true, pullup: true }
     rmt_symbols: 64
-    dump: []
+  
 
 # Transmitter 1: pointed at the TV
 remote_transmitter:

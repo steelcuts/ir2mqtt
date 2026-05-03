@@ -28,9 +28,9 @@ Follow these four steps to get IR2MQTT up and running:
 
 Flash an ESP32 with the IR2MQTT ESPHome firmware. Connect an IR receiver (38 kHz) and an IR LED to GPIO pins. New to this? The **[Hardware Setup Guide](/hardware-setup)** covers everything: ESP32 board selection, IR components, wiring, ESPHome installation, and step-by-step configuration.
 
-**2. Connect to MQTT**
+**2. Set Up an MQTT Broker**
 
-Configure your MQTT broker credentials in the IR2MQTT add-on options (Home Assistant) or in `/data/options.yaml` (standalone Docker). IR2MQTT will auto-discover any bridge that connects to the same broker.
+IR2MQTT and your ESP32 bridges communicate via MQTT — you need a broker running somewhere on your network. The quickest option is the **Mosquitto add-on** in Home Assistant (one click in the add-on store). For standalone setups, a Docker container works just as well. Once the broker is running, enter the credentials in the IR2MQTT add-on options or `/data/options.yaml`. See the [MQTT Broker Setup](/hardware-setup#setting-up-the-mqtt-broker) section for step-by-step instructions.
 
 **3. Add a Device**
 
