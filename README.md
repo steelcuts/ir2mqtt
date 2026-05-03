@@ -13,6 +13,15 @@ IR2MQTT bridges the gap between physical Infrared devices and your smart home. I
 
 ---
 
+## Live Demo
+
+Try out the Web UI directly in your browser without installing anything:
+**[ir2mqtt.steelcuts.net](https://ir2mqtt.steelcuts.net/)**
+
+*(The demo environment supports up to 20 concurrent, fully isolated sessions. Each session provides its own virtual backend, MQTT broker, and simulated IR bridge.)*
+
+---
+
 ## Documentation
 
 Full documentation — hardware setup, wiring, ESPHome bridge component, MQTT reference, automations, and more — is available at:
