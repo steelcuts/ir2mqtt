@@ -7,7 +7,7 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: /devices
+      link: /hardware-setup
     - theme: alt
       text: View on GitHub
       link: https://github.com/steelcuts/ir2mqtt
@@ -26,7 +26,7 @@ Follow these four steps to get IR2MQTT up and running:
 
 **1. Flash a Bridge**
 
-Flash an ESP32 with the IR2MQTT ESPHome firmware from the [ir2mqtt_bridge](https://github.com/steelcuts/ir2mqtt_bridge) repository. Connect an IR receiver (38 kHz) and an IR LED to the GPIO pins defined in the firmware config.
+Flash an ESP32 with the IR2MQTT ESPHome firmware. Connect an IR receiver (38 kHz) and an IR LED to GPIO pins. New to this? The **[Hardware Setup Guide](/hardware-setup)** covers everything: ESP32 board selection, IR components, wiring, ESPHome installation, and step-by-step configuration.
 
 **2. Connect to MQTT**
 

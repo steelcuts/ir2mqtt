@@ -8,7 +8,9 @@
     "export-pdf": "press-export-pdf export ."
   },
   "devDependencies": {
+    "mermaid": "^11.14.0",
     "vitepress": "^1.6.4",
-    "vitepress-export-pdf": "^1.0.0"
+    "vitepress-export-pdf": "^1.0.0",
+    "vitepress-plugin-mermaid": "^2.0.17"
   }
 }

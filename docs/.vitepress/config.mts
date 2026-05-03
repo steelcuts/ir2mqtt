@@ -11,6 +11,12 @@ export default defineConfig({
     ],
     sidebar: [
       {
+        text: 'Setup Guide',
+        items: [
+          { text: 'Hardware Setup & Installation', link: '/hardware-setup' },
+        ],
+      },
+      {
         text: 'Getting Started',
         items: [
           { text: 'Devices', link: '/devices' },
