@@ -15,6 +15,13 @@ class ProbonoProvider(IrRepoProvider):
             name="Probono IRDB",
             url="https://github.com/probonopd/irdb/archive/refs/heads/master.zip",
         )
+        self._skip_counts: dict[str, int] = {
+            "unsupported_protocol": 0,
+            "malformed_hex": 0,
+            "no_code_data": 0,
+            "no_handler": 0,
+            "missing_fields": 0,
+        }
 
     def convert(self, raw_root: Path) -> list[dict]:
         remotes = []
@@ -61,8 +68,7 @@ class ProbonoProvider(IrRepoProvider):
             "skip_reasons": dict(self._skip_counts),
         }
         logger.info(
-            "[%s] Conversion stats: %d rows total, %d imported, %d skipped "
-            "(protocol=%d, malformed_hex=%d, no_code_data=%d, no_handler=%d, missing_fields=%d)",
+            "[%s] Conversion stats: %d rows total, %d imported, %d skipped (protocol=%d, malformed_hex=%d, no_code_data=%d, no_handler=%d, missing_fields=%d)",
             self.name,
             total_rows,
             total_imported,

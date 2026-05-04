@@ -59,7 +59,7 @@ def test_probono_parse_csv(tmp_path):
     content = "functionname,protocol,hex\nPower,NEC,0x1234\nVol+,RC5,0x5678"
     p.write_text(content)
 
-    buttons = provider._parse_csv_file(p)
+    buttons, _ = provider._parse_csv_file(p)
 
     assert len(buttons) == 2
 
@@ -96,7 +96,7 @@ def test_probono_parse_csv_various_formats(tmp_path):
     content = "functionname,protocol,device,subdevice,function\nPower,NEC,1,0,20"
     p.write_text(content)
 
-    buttons = provider._parse_csv_file(p)
+    buttons, _ = provider._parse_csv_file(p)
     assert len(buttons) == 1
     assert buttons[0]["name"] == "Power"
     assert buttons[0]["code"]["protocol"] == "nec"

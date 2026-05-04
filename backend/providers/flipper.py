@@ -20,6 +20,8 @@ class FlipperProvider(IrRepoProvider):
             name="Flipper IRDB",
             url="https://github.com/logickworkshop/Flipper-IRDB/archive/refs/heads/main.zip",
         )
+        self._total_buttons_seen = 0
+        self._total_buttons_skipped = 0
 
     def convert(self, raw_root: Path) -> list[dict]:
         remotes = []
