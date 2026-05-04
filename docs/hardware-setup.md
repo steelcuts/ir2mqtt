@@ -97,7 +97,8 @@ IR LEDs emit light at around **940 nm** — in the near-infrared spectrum, invis
 | Part | Notes |
 |------|-------|
 | WS2812B (NeoPixel) single LED or strip | Status LED for the bridge — shows connection state, IR activity |
-| 2N2222 or BC547 NPN transistor | For a high-power IR circuit (longer range) |
+| High-power IR transmitter module (1 W variant) | Ready-made alternative to the transistor + LED circuit — connects like an IR receiver, no resistors needed. See below. |
+| 2N2222 or BC547 NPN transistor | For a DIY high-power IR circuit (longer range) — any NPN you have lying around works for a single LED |
 | 1 kΩ resistor | Base resistor for the transistor circuit |
 | 100 µF electrolytic capacitor | Decoupling on the 3.3V rail — prevents brownouts during IR TX |
 | 3D-printed enclosure or project box | For a clean installation |
@@ -241,6 +242,29 @@ The pin numbers shown in the diagram refer to the physical legs of the transisto
 **How it works:** When the ESP32 GPIO goes HIGH, a small base current (~3 mA) flows through the 1 kΩ resistor into pin 2 (B). This turns the transistor on, closing the path from pin 1 (C) to pin 3 (E). Current can now flow from VCC through the resistor and LED, into the collector, and out the emitter to GND.
 
 The GPIO never drives the LED directly — it only controls the transistor gate. At 3.3 V with a 33 Ω resistor: `I = (3.3 − 1.35) / 0.033 ≈ 59 mA` — nearly three times more than direct GPIO drive, at essentially no risk to the ESP32.
+
+:::tip Which transistor to use — and when to switch to a MOSFET
+The circuit above uses a **BC547** (or 2N2222). These are classic small-signal NPN transistors that almost every hobbyist has collecting dust in a drawer somewhere — that is the only reason they appear in this example. They work fine for driving a single IR LED at ~50–100 mA.
+
+**Their limit:** a BC547 is rated for a maximum collector current of 100 mA (2N2222: 600 mA). If you want to drive multiple LEDs in parallel at higher peak currents, it will get hot and may not switch cleanly enough to reproduce accurate IR pulse timing.
+
+For the multi-LED circuits or if you want a more robust design, consider a **logic-level N-channel MOSFET** instead:
+
+| | NPN transistor (BC547, 2N2222) | N-channel MOSFET (e.g. 2N7000, BSS138, AO3400) |
+|--|---|---|
+| **Control method** | Current-controlled: small base current opens the switch | Voltage-controlled: gate voltage opens the switch — virtually zero control current |
+| **Base/Gate resistor** | Required (limits base current, e.g. 1 kΩ) | Optional (gate is high-impedance; small series resistor ~100 Ω is recommended to damp ringing) |
+| **3.3V logic compatible** | Yes (any NPN with Vbe ~0.6V) | **Only if it is a logic-level MOSFET** — check that Vgs(th) is below 2 V. Standard MOSFETs need 5–10 V to fully open. |
+| **Power handling** | BC547: ~100 mA, 2N2222: ~600 mA | Depends on part — AO3400: 5.7 A continuous |
+
+In practice, for a single IR LED at short-to-medium range the BC547 in a drawer is perfectly fine. For high-current multi-LED arrays, use a logic-level MOSFET.
+:::
+
+:::tip Skip the discrete circuit entirely — ready-made high-power module
+If you would rather not deal with the wiring, resistors, and transistor selection, there is a compact ready-made solution: a **1 W high-power IR transmitter module** (shared by Reddit user dafunkjoker). It connects to the ESP32 exactly like an IR receiver module — just VCC, GND, and signal. No additional resistors or driver circuit needed.
+
+The module is available on AliExpress ([search for "1W IR transmitter module"](https://aliexpress.com/item/1005010219059804.html)). According to the spec sheet it covers 120° and up to 20–30 m. Community testing confirms it works reliably at ~7 m in a living room even pointing away from the device, which is a significant improvement over a direct-drive LED setup.
+:::
 
 ### Multiple IR LEDs for wider coverage
 
