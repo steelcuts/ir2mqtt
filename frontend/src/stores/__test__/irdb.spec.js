@@ -39,14 +39,14 @@ describe('IRDB Store', () => {
         expect(commonStore.addFlashMessage).toHaveBeenCalledWith(expect.stringContaining('Failed'), 'error');
     });
 
-    it('handles progress and completion', () => {
+    it('handles progress and completion', async () => {
         api.mockResolvedValue({});
         store.handleIrdbProgress({ status: 'downloading', percent: 50 });
         expect(store.irdbProgress.percent).toBe(50);
 
-        store.handleIrdbProgress({ status: 'done' });
-        expect(commonStore.addFlashMessage).toHaveBeenCalledWith(expect.stringContaining('successfully'), 'success');
-        
+        await store.handleIrdbProgress({ status: 'done' });
+        expect(commonStore.addFlashMessage).toHaveBeenCalledWith(expect.stringContaining('successfully'), 'success', 8000);
+
         vi.advanceTimersByTime(2000);
         expect(store.irdbProgress).toBeNull();
     });

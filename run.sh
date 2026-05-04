@@ -2,7 +2,7 @@
 
 echo "Starting IR2MQTT backend in Home Assistant Add-on mode..."
 
-PORT=${INGRESS_PORT:-8099}
+PORT=${APP_PORT:-${INGRESS_PORT:-8099}}
 
 # Run pending database migrations
 python3 -m alembic upgrade head

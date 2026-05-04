@@ -312,9 +312,17 @@ onUnmounted(() => {
             {{ t('irdb.noDb') }}
           </p>
             
-          <div class="max-w-sm text-xs text-gray-500 bg-yellow-900/20 border border-yellow-700/50 p-3 rounded text-left">
-            <strong class="text-yellow-500 block mb-1">{{ t('irdb.disclaimerTitle') }}</strong>
-            {{ t('irdb.disclaimerText') }}
+          <div class="max-w-sm text-xs text-gray-500 bg-yellow-900/20 border border-yellow-700/50 p-3 rounded text-left space-y-2">
+            <strong class="text-yellow-500 block">{{ t('irdb.disclaimerTitle') }}</strong>
+            <p>{{ t('irdb.disclaimerText') }}</p>
+            <p>
+              {{ t('irdb.disclaimerWip') }} <a
+                href="https://github.com/steelcuts/ir2mqtt/issues"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-yellow-400 underline hover:text-yellow-300"
+              >{{ t('irdb.disclaimerIssueLink') }}</a>.
+            </p>
           </div>
 
           <div class="bg-[var(--color-bg-tertiary)] p-4 rounded-lg text-left space-y-2 w-64">

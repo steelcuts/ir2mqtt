@@ -89,6 +89,9 @@ export const useCommonStore = defineStore('common', () => {
     };
 
     // WebSocket Logic
+    let _currentWs: WebSocket | null = null;
+    let _reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+
     const parseLog = (logStr: string): LogEntry => {
         const match = logStr.match(/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}) - ([\w.-]+) - (DEBUG|INFO|WARNING|ERROR) - (.*)/s);
         if (match) {
@@ -106,6 +109,11 @@ export const useCommonStore = defineStore('common', () => {
     };
 
     const connectWs = () => {
+        if (_reconnectTimer !== null) {
+            clearTimeout(_reconnectTimer);
+            _reconnectTimer = null;
+        }
+
         const deviceStore = useDeviceStore();
         const bridgeStore = useBridgeStore();
         const learnStore = useLearnStore();
@@ -117,6 +125,7 @@ export const useCommonStore = defineStore('common', () => {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const wsUrl = `${protocol}//${window.location.host}${basePath}/ws/events`;
         const ws = new WebSocket(wsUrl);
+        _currentWs = ws;
 
         ws.onmessage = (event) => {
             const msg = JSON.parse(event.data);
@@ -190,8 +199,9 @@ export const useCommonStore = defineStore('common', () => {
             settingsStore.fetchAppMode();
         };
         ws.onclose = () => {
+            if (ws !== _currentWs) return;
             logs.value.push({ level: 'ERROR', message: t('store.wsDisconnected'), timestamp: new Date(), special: 'disconnected' });
-            setTimeout(connectWs, 3000);
+            _reconnectTimer = setTimeout(connectWs, 3000);
         };
     };
 

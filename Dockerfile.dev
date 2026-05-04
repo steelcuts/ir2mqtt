@@ -20,7 +20,8 @@ RUN pip install --no-cache-dir -r requirements.dev.txt \
 COPY backend /app/backend
 
 # Expose the port the app runs on
+ENV APP_PORT=8099
 EXPOSE 8099
 
 # Run the application with hot-reloading
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8099", "--reload", "--reload-dir", "backend"]
+CMD sh -c "uvicorn backend.main:app --host 0.0.0.0 --port ${APP_PORT} --reload --reload-dir backend"

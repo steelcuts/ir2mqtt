@@ -16,6 +16,17 @@ export interface IrdbProgress {
     status: string;
     message?: string;
     percent?: number;
+    stats?: {
+        total_remotes: number;
+        total_codes: number;
+        total_skipped: number;
+        providers?: Record<string, {
+            total_rows: number;
+            imported: number;
+            skipped: number;
+            skip_reasons: Record<string, number>;
+        }>;
+    };
 }
 
 export interface IrDbItem {
@@ -50,12 +61,20 @@ export const useIrdbStore = defineStore('irdb', () => {
         body: JSON.stringify({ code, target: targets.length > 0 ? targets : null }),
     });
 
-    const handleIrdbProgress = (msg: IrdbProgress) => {
+    const handleIrdbProgress = async (msg: IrdbProgress) => {
         irdbProgress.value = msg;
         if (msg.status === 'done') {
             setTimeout(() => { irdbProgress.value = null; }, 2000);
-            fetchIrdbStatus();
-            commonStore.addFlashMessage(t('store.irdbUpdateSuccess'), 'success');
+            await fetchIrdbStatus();
+            const s = msg.stats;
+            const flashMsg = s
+                ? t('store.irdbUpdateSuccessStats', {
+                    remotes: s.total_remotes.toLocaleString(),
+                    codes: s.total_codes.toLocaleString(),
+                    skipped: s.total_skipped.toLocaleString(),
+                  })
+                : t('store.irdbUpdateSuccess');
+            commonStore.addFlashMessage(flashMsg, 'success', 8000);
         }
     };
 

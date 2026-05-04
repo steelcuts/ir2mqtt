@@ -47,8 +47,7 @@ SUPPORTED_PROTOCOLS = {
     "symphony",
     "toshiba_ac",
     "toto",
-    # Legacy
-    # "whynter", "sharp", "sanyo", "toshiba", "rca",
+    # "whynter", "sanyo", "toshiba", "sharp", "rca" — not supported by ESPHome
 }
 
 
@@ -498,6 +497,7 @@ class IrRepoProvider(ABC):
         self.id = id
         self.name = name
         self.url = url
+        self.last_convert_stats: dict = {}
 
     async def download_and_convert(self, broadcast_func=None) -> list[dict]:
         """Downloads, extracts and converts IR data. Returns list of remote dicts with buttons."""
