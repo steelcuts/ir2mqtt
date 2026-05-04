@@ -1,8 +1,11 @@
 import csv
+import logging
 import os
 from pathlib import Path
 
 from ..ir_base import SUPPORTED_PROTOCOLS, IrRepoProvider, standardize_ir_key
+
+logger = logging.getLogger("ir2mqtt")
 
 
 class ProbonoProvider(IrRepoProvider):
