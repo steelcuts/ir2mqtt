@@ -1097,13 +1097,14 @@ services:
     container_name: ir2mqtt
     restart: unless-stopped
     ports:
-      - "8099:8099"
+      - "${APP_PORT:-8099}:${APP_PORT:-8099}"
     environment:
       - MQTT_BROKER=192.168.1.10     # Your broker's IP
       - MQTT_PORT=1883
       - MQTT_USER=mqtt_user
       - MQTT_PASS=mqtt_password
       - APP_MODE=home_assistant       # or 'standalone'
+      - APP_PORT=8099                 # Change to use a different host port
     volumes:
       - ./data:/data
     # Only needed if you plan to use serial (USB) bridges:
@@ -1115,7 +1116,7 @@ services:
 docker-compose up -d
 ```
 
-The Web UI is now available at `http://<your-host-ip>:8099`.
+The Web UI is now available at `http://<your-host-ip>:8099` (or whichever port you set via `APP_PORT`).
 
 **Environment variables reference:**
 
@@ -1125,6 +1126,7 @@ The Web UI is now available at `http://<your-host-ip>:8099`.
 | `MQTT_PORT` | `1883` | MQTT broker port |
 | `MQTT_USER` | *(empty)* | MQTT username |
 | `MQTT_PASS` | *(empty)* | MQTT password |
+| `APP_PORT` | `8099` | HTTP port the application listens on |
 | `APP_MODE` | `standalone` | `home_assistant` enables MQTT auto-discovery in HA |
 | `LOG_LEVEL` | `INFO` | Logging verbosity (`DEBUG`, `INFO`, `WARNING`, `ERROR`) |
 
