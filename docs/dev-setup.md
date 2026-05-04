@@ -100,7 +100,7 @@ Always run `make migrate-check` before opening a PR that touches SQLAlchemy mode
 |---------|-------------|
 | `make docker-build` | Build image for the current platform (fast, for local testing) |
 | `make docker-build-multi` | Build for `linux/amd64` + `linux/arm64` (like CI) |
-| `make docker-run` | Run the built image + Mosquitto at `http://localhost:8099` |
+| `make docker-run` | Run the built image + Mosquitto (port via `APP_PORT`, default `8099`) |
 | `make docker-stop` | Stop and remove the local test containers |
 
 ### Documentation
@@ -182,6 +182,7 @@ The backend reads the following variables at startup (all optional in developmen
 | `DATABASE_URL` | `sqlite+aiosqlite:///./data/ir2mqtt.db` | SQLAlchemy async URL |
 | `MQTT_BROKER` | `localhost` | MQTT broker hostname |
 | `MQTT_PORT` | `1883` | MQTT broker port |
+| `APP_PORT` | `8099` | HTTP port the application listens on |
 | `APP_MODE` | `standalone` | `standalone` or `ha_app` |
 | `APP_ENV` | `production` | `development` enables auto-reload |
 | `LOG_LEVEL` | `INFO` | uvicorn / app log level |
@@ -189,6 +190,14 @@ The backend reads the following variables at startup (all optional in developmen
 | `OPTIONS_FILE` | `./data/options.yaml` | HA app options file path |
 
 In `make dev-local` and `make test-e2e` these are set automatically via the startup scripts.
+
+To override variables when running via Docker Compose, copy `.env.example` to `.env` and adjust as needed. For example, to run on a different port:
+
+```bash
+cp .env.example .env
+# edit .env: APP_PORT=9090
+make dev
+```
 
 ---
 
