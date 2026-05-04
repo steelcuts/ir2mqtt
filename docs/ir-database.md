@@ -33,6 +33,12 @@ The imported buttons are added to the device without overwriting existing ones. 
 Database codes are community-contributed and may not work for every revision of a device. If a code doesn't work, try another entry for the same brand, or learn the code directly from your physical remote using **Learning Mode**.
 :::
 
+:::info Incomplete import coverage
+Not all codes from these databases can be imported — entries using unsupported protocols or non-standard formats are silently skipped. After an update, the UI shows how many codes were imported and how many were skipped. This is a work in progress.
+
+If you notice a device where most or all buttons are missing after import, please [open an issue on GitHub](https://github.com/steelcuts/ir2mqtt/issues) with the device name and the exact path in the database browser (e.g. `Probono → Denon → AV Receiver → AVR-X1600H`).
+:::
+
 ## Updating the Database
 
 Re-run the download from the UI to fetch the latest community-updated files. Existing learned codes on your devices are never modified by a database update.
@@ -49,11 +55,15 @@ Both source formats use different protocol names than IR2MQTT internally. These 
 
 | Source name | Maps to |
 |-------------|---------|
-| `necext`, `nec42` | `nec` |
+| `necext`, `nec42`, `nec-y1`, `nec-y2`, `nec-y3`, `nec_ext` | `nec` |
 | `samsung32` | `samsung` |
-| `sirc`, `sirc15`, `sirc20` | `sony` |
+| `sirc`, `sirc12`, `sirc15`, `sirc20` | `sony` |
 | `kaseikyo` | `panasonic` |
 | `rc5x` | `rc5` |
+| `rc6-m-56` | `rc6` |
+| `lg2` | `lg` |
+| `rc_switch`, `rcswitch` | `rc_switch` |
+| `dish` variants | `dish` |
 
 Protocols not in this list are passed through as-is, then checked against the list of supported protocols.
 
@@ -61,7 +71,7 @@ Protocols not in this list are passed through as-is, then checked against the li
 
 The following protocols exist in the source databases but are **not supported** by IR2MQTT. Buttons using these protocols are silently skipped during import — they won't appear in the results and no warning is shown:
 
-`sharp`, `sanyo`, `toshiba` (standard variant — `toshiba_ac` is supported), `rca`, `whynter`
+`sharp`, `rca`, `sanyo`, `toshiba` (standard variant — `toshiba_ac` is supported), `whynter`
 
 If you notice that a device has fewer buttons after import than expected, this is the most likely cause.
 
