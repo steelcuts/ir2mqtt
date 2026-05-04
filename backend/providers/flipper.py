@@ -21,12 +21,16 @@ class FlipperProvider(IrRepoProvider):
             url="https://github.com/logickworkshop/Flipper-IRDB/archive/refs/heads/main.zip",
         )
         self._total_buttons_seen = 0
-        self._total_buttons_skipped = 0
+        self._skip_counts: dict[str, int] = {
+            "unsupported_protocol": 0,
+            "malformed_raw": 0,
+            "missing_name": 0,
+        }
 
     def convert(self, raw_root: Path) -> list[dict]:
         remotes = []
         self._total_buttons_seen = 0
-        self._total_buttons_skipped = 0
+        self._skip_counts = {k: 0 for k in self._skip_counts}
 
         for root, dirs, files in os.walk(raw_root):
             dirs[:] = [d for d in dirs if d.lower() not in ["assets", "_converted_", ".git"]]
@@ -52,19 +56,23 @@ class FlipperProvider(IrRepoProvider):
                     )
 
         total_imported = sum(len(r["buttons"]) for r in remotes)
-        total_skipped = self._total_buttons_skipped
+        total_skipped = sum(self._skip_counts.values())
         self.last_convert_stats = {
             "total_rows": self._total_buttons_seen,
             "imported": total_imported,
             "skipped": total_skipped,
-            "skip_reasons": {"unsupported_protocol": total_skipped},
+            "skip_reasons": dict(self._skip_counts),
         }
         logger.info(
-            "[%s] Conversion stats: %d buttons seen, %d imported, %d skipped (unsupported protocol/format)",
+            "[%s] Conversion stats: %d buttons seen, %d imported, %d skipped "
+            "(protocol=%d, malformed_raw=%d, missing_name=%d)",
             self.name,
             self._total_buttons_seen,
             total_imported,
             total_skipped,
+            self._skip_counts["unsupported_protocol"],
+            self._skip_counts["malformed_raw"],
+            self._skip_counts["missing_name"],
         )
         return remotes
 
@@ -94,9 +102,10 @@ class FlipperProvider(IrRepoProvider):
         return buttons
 
     def _finalize_button(self, btn_data: dict, buttons_list: list):
-        if "name" not in btn_data:
-            return
         self._total_buttons_seen += 1
+        if "name" not in btn_data:
+            self._skip_counts["missing_name"] += 1
+            return
 
         std = standardize_ir_key(btn_data["name"])
         name = std["name"]
@@ -143,7 +152,7 @@ class FlipperProvider(IrRepoProvider):
         if btn_data.get("type", "").lower() == "raw":
             protocol = "raw"
         if protocol not in SUPPORTED_PROTOCOLS:
-            self._total_buttons_skipped += 1
+            self._skip_counts["unsupported_protocol"] += 1
             return
 
         payload: dict = {}
@@ -152,6 +161,7 @@ class FlipperProvider(IrRepoProvider):
             try:
                 payload["timings"] = [int(x) for x in raw_str.split()]
             except Exception:
+                self._skip_counts["malformed_raw"] += 1
                 return
             try:
                 freq = int(btn_data["frequency"])
