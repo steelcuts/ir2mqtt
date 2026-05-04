@@ -23,6 +23,9 @@ class FlipperProvider(IrRepoProvider):
 
     def convert(self, raw_root: Path) -> list[dict]:
         remotes = []
+        self._total_buttons_seen = 0
+        self._total_buttons_skipped = 0
+
         for root, dirs, files in os.walk(raw_root):
             dirs[:] = [d for d in dirs if d.lower() not in ["assets", "_converted_", ".git"]]
 
@@ -45,6 +48,22 @@ class FlipperProvider(IrRepoProvider):
                             "buttons": buttons,
                         }
                     )
+
+        total_imported = sum(len(r["buttons"]) for r in remotes)
+        total_skipped = self._total_buttons_skipped
+        self.last_convert_stats = {
+            "total_rows": self._total_buttons_seen,
+            "imported": total_imported,
+            "skipped": total_skipped,
+            "skip_reasons": {"unsupported_protocol": total_skipped},
+        }
+        logger.info(
+            "[%s] Conversion stats: %d buttons seen, %d imported, %d skipped (unsupported protocol/format)",
+            self.name,
+            self._total_buttons_seen,
+            total_imported,
+            total_skipped,
+        )
         return remotes
 
     def _parse_ir_file(self, path: Path) -> list[dict]:
@@ -75,6 +94,7 @@ class FlipperProvider(IrRepoProvider):
     def _finalize_button(self, btn_data: dict, buttons_list: list):
         if "name" not in btn_data:
             return
+        self._total_buttons_seen += 1
 
         std = standardize_ir_key(btn_data["name"])
         name = std["name"]
@@ -121,6 +141,7 @@ class FlipperProvider(IrRepoProvider):
         if btn_data.get("type", "").lower() == "raw":
             protocol = "raw"
         if protocol not in SUPPORTED_PROTOCOLS:
+            self._total_buttons_skipped += 1
             return
 
         payload: dict = {}

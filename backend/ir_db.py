@@ -147,7 +147,26 @@ class IrDbManager:
         import time
 
         self._last_updated = int(time.time() * 1000)
-        await broadcast_ws({"type": "irdb_progress", "status": "done", "message": "Update complete."})
+        db_stats = await self.get_stats()
+
+        convert_stats = {}
+        for p in providers_to_update:
+            if p.last_convert_stats:
+                convert_stats[p.id] = p.last_convert_stats
+
+        total_skipped = sum(s.get("skipped", 0) for s in convert_stats.values())
+
+        await broadcast_ws({
+            "type": "irdb_progress",
+            "status": "done",
+            "message": "Update complete.",
+            "stats": {
+                "total_remotes": db_stats["total_remotes"],
+                "total_codes": db_stats["total_codes"],
+                "total_skipped": total_skipped,
+                "providers": convert_stats,
+            },
+        })
 
     async def search(self, query: str) -> list[dict]:
         if not query:
