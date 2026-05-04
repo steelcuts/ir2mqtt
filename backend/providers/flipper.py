@@ -64,8 +64,7 @@ class FlipperProvider(IrRepoProvider):
             "skip_reasons": dict(self._skip_counts),
         }
         logger.info(
-            "[%s] Conversion stats: %d buttons seen, %d imported, %d skipped "
-            "(protocol=%d, malformed_raw=%d, missing_name=%d)",
+            "[%s] Conversion stats: %d buttons seen, %d imported, %d skipped (protocol=%d, malformed_raw=%d, missing_name=%d)",
             self.name,
             self._total_buttons_seen,
             total_imported,
