@@ -15,6 +15,16 @@ class ProbonoProvider(IrRepoProvider):
 
     def convert(self, raw_root: Path) -> list[dict]:
         remotes = []
+        self._skip_counts: dict[str, int] = {
+            "unsupported_protocol": 0,
+            "malformed_hex": 0,
+            "no_code_data": 0,
+            "no_handler": 0,
+            "missing_fields": 0,
+        }
+        total_rows = 0
+        total_imported = 0
+
         start_dir = raw_root / "codes" if (raw_root / "codes").exists() else raw_root
 
         for root, dirs, files in os.walk(start_dir):
@@ -25,7 +35,9 @@ class ProbonoProvider(IrRepoProvider):
                 source_file = Path(root) / file
                 rel_path = source_file.relative_to(start_dir)
 
-                buttons = self._parse_csv_file(source_file)
+                buttons, file_rows = self._parse_csv_file(source_file)
+                total_rows += file_rows
+                total_imported += len(buttons)
                 if buttons:
                     path = f"{self.id}/{rel_path.with_suffix('')}"
                     remotes.append(
@@ -37,10 +49,32 @@ class ProbonoProvider(IrRepoProvider):
                             "buttons": buttons,
                         }
                     )
+
+        total_skipped = sum(self._skip_counts.values())
+        self.last_convert_stats = {
+            "total_rows": total_rows,
+            "imported": total_imported,
+            "skipped": total_skipped,
+            "skip_reasons": dict(self._skip_counts),
+        }
+        logger.info(
+            "[%s] Conversion stats: %d rows total, %d imported, %d skipped "
+            "(protocol=%d, malformed_hex=%d, no_code_data=%d, no_handler=%d, missing_fields=%d)",
+            self.name,
+            total_rows,
+            total_imported,
+            total_skipped,
+            self._skip_counts["unsupported_protocol"],
+            self._skip_counts["malformed_hex"],
+            self._skip_counts["no_code_data"],
+            self._skip_counts["no_handler"],
+            self._skip_counts["missing_fields"],
+        )
         return remotes
 
-    def _parse_csv_file(self, path: Path) -> list[dict]:
+    def _parse_csv_file(self, path: Path) -> tuple[list[dict], int]:
         buttons = []
+        total_rows = 0
         try:
             with open(path, encoding="utf-8", errors="ignore") as f:
                 sample = f.read(2048)
@@ -51,6 +85,7 @@ class ProbonoProvider(IrRepoProvider):
                     reader.fieldnames = [fn.lower().strip() if fn else "" for fn in reader.fieldnames]
 
                 for row in reader:
+                    total_rows += 1
                     name = row.get("functionname") or row.get("key") or row.get("name") or row.get("button")
                     protocol = row.get("protocol") or row.get("proto")
                     hex_code = row.get("hex") or row.get("scancode") or row.get("code") or row.get("data")
@@ -62,9 +97,11 @@ class ProbonoProvider(IrRepoProvider):
                         btn = self._convert_row(name, protocol, hex_code, device, subdevice, function)
                         if btn:
                             buttons.append(btn)
+                    else:
+                        self._skip_counts["missing_fields"] += 1
         except Exception:
             pass
-        return buttons
+        return buttons, total_rows
 
     def _convert_row(
         self,
@@ -81,37 +118,44 @@ class ProbonoProvider(IrRepoProvider):
         protocol = protocol.lower().strip()
         nbits = None
 
-        if protocol in ["nec", "nec1", "nec2", "necx1", "necx2", "apple"]:
+        if protocol in ["nec", "nec1", "nec2", "necx1", "necx2", "apple", "nec_ext", "nec-y1", "nec-y2", "nec-y3"]:
             protocol = "nec"
-        elif protocol in ["rc5", "rc5-7f"]:
+        elif protocol in ["rc5", "rc5-7f", "rc5x"]:
             protocol = "rc5"
-        elif protocol in ["rc6", "rc6-0-16", "rc6-6-20"]:
+        elif protocol in ["rc6", "rc6-0-16", "rc6-6-20", "rc6-m-56"]:
             protocol = "rc6"
-        elif protocol == "sony12":
+        elif protocol in ["sony12", "sirc12"]:
             protocol = "sony"
             nbits = 12
-        elif protocol == "sony15":
+        elif protocol in ["sony15", "sirc15"]:
             protocol = "sony"
             nbits = 15
-        elif protocol == "sony20":
+        elif protocol in ["sony20", "sirc20"]:
             protocol = "sony"
             nbits = 20
         elif protocol in ["jvc", "jvc-48", "jvc{2}"]:
             protocol = "jvc"
+        elif protocol in ["samsung", "samsung32"]:
+            protocol = "samsung"
         elif protocol in ["samsung36"]:
             protocol = "samsung36"
         elif protocol in ["sharp", "sharp{1}", "sharp{2}", "sharpdvd"]:
             protocol = "sharp"
         elif protocol in ["rca", "rca-38", "rca(old)"]:
             protocol = "rca"
-        elif protocol in ["dish_network", "dishplayer"]:
+        elif protocol in ["dish_network", "dishplayer", "dish"]:
             protocol = "dish"
         elif protocol in ["pioneer"]:
             protocol = "pioneer"
-        elif protocol in ["panasonic", "panasonic2", "panasonic_old"]:
+        elif protocol in ["panasonic", "panasonic2", "panasonic_old", "kaseikyo"]:
             protocol = "panasonic"
+        elif protocol in ["lg", "lg2"]:
+            protocol = "lg"
+        elif protocol in ["rc_switch", "rcswitch"]:
+            protocol = "rc_switch"
 
         if protocol not in SUPPORTED_PROTOCOLS:
+            self._skip_counts["unsupported_protocol"] += 1
             return None
         payload: dict = {}
 
@@ -131,8 +175,9 @@ class ProbonoProvider(IrRepoProvider):
                     if nbits is not None:
                         payload["nbits"] = nbits
             except ValueError:
+                self._skip_counts["malformed_hex"] += 1
                 return None
-        elif device and function:
+        elif function not in (None, ""):
             try:
 
                 def get_val(v):
@@ -172,16 +217,22 @@ class ProbonoProvider(IrRepoProvider):
                     "rca",
                     "pioneer",
                     "dish",
+                    "samsung",
                     "samsung36",
                     "panasonic",
+                    "lg",
+                    "rc_switch",
                 ]:
                     payload["address"] = f"0x{d_val:X}"
                     payload["command"] = f"0x{f_val:X}"
                 else:
+                    self._skip_counts["no_handler"] += 1
                     return None
             except ValueError:
+                self._skip_counts["malformed_hex"] += 1
                 return None
         else:
+            self._skip_counts["no_code_data"] += 1
             return None
 
         return {"name": name, "icon": icon, "code": {"protocol": protocol, "payload": payload}}
