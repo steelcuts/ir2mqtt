@@ -22,6 +22,14 @@ IR2MQTT reads credentials from `/data/options.json` (managed by the HA Superviso
 
 ## IR Codes Not Working
 
+:::tip TV remotes with Bluetooth mode
+Many modern TVs (e.g. Hisense, Samsung) ship with remotes that can operate in both IR and Bluetooth mode. If your remote is currently paired via Bluetooth, the IR LED is inactive and IR2MQTT cannot capture any codes.
+
+**How to tell which mode your remote is in:** look directly into the IR LED on the remote tip and press a button. There is usually a small SMD status LED right behind it — both colours are very faint, but **red** means IR mode and **blue** means Bluetooth.
+
+Switch to IR mode in the TV's settings (look for *Remote Control → Disable Bluetooth Remote* or similar), then learn the codes. Receiving always works regardless of mode.
+:::
+
 - **Wrong protocol:** If a device doesn't respond to learned codes, try disabling all protocols except the one you expect (e.g. NEC for most TVs) on the Bridge settings page.
 - **Echo suppression blocking codes:** If a button triggers correctly the first time but not immediately after, echo suppression may be too aggressive. Reduce the timeout or disable **Ignore Others** in the bridge settings.
 - **RAW codes unreliable:** RAW captures are sensitive to timing. Use **Smart Learning** (multiple presses) to get a more consistent signal. If it still fails, try capturing from a shorter distance.

@@ -50,12 +50,13 @@ services:
     container_name: ir2mqtt
     restart: unless-stopped
     ports:
-      - "8099:8099"
+      - "${APP_PORT:-8099}:${APP_PORT:-8099}"
     environment:
       - MQTT_BROKER=192.168.1.100
       - MQTT_USER=mqtt_user
       - MQTT_PASS=mqtt_password
       - APP_MODE=standalone   # or 'home_assistant'
+      - APP_PORT=8099         # change port here and in 'ports' above
     volumes:
       - ./data:/data
     devices:
@@ -64,7 +65,7 @@ services:
 
 ```bash
 docker-compose up -d
-# Web UI: http://<your-ip>:8099
+# Web UI: http://<your-ip>:8099  (or your chosen APP_PORT)
 ```
 
 ---
