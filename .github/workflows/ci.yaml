@@ -42,7 +42,7 @@ jobs:
             e2e:
               - 'frontend/**'
               - 'backend/**'
-              - 'scripts/**'
+              - 'scripts/*.sh'
             docker:
               - 'Dockerfile*'
               - 'rootfs/**'
