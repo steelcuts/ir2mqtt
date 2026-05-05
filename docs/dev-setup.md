@@ -103,6 +103,14 @@ Always run `make migrate-check` before opening a PR that touches SQLAlchemy mode
 | `make docker-run` | Run the built image + Mosquitto (port via `APP_PORT`, default `8099`) |
 | `make docker-stop` | Stop and remove the local test containers |
 
+### Licenses
+
+| Command | What it does |
+|---------|-------------|
+| `make licenses` | Regenerate `THIRD_PARTY_LICENSES.md` from all Python and frontend dependencies |
+
+Run this whenever dependencies are added or updated. The generated file lists every package with its license and includes notes for non-permissive licenses (MPL, EPL, GPL).
+
 ### Documentation
 
 | Command | What it does |
