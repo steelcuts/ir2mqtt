@@ -2,7 +2,7 @@
         test-backend test-frontend test-e2e test-integration test-simulator test-simulator-gui \
         test check help dev-local dev setup install-hooks update-deps clean migrate migration-create migrate-stamp migrate-check \
         docker-build docker-build-multi docker-run docker-stop \
-        showcase doc-gifs docs-pdf
+        showcase doc-gifs docs-pdf licenses
 
 # Auto-detect Python: prefer local .venv, fall back to system python3
 PYTHON ?= $(shell [ -f .venv/bin/python3 ] && echo .venv/bin/python3 || echo python3)
@@ -46,6 +46,7 @@ help:
 	@echo "  make showcase           		Generate a UI showcase video/GIF using Playwright"
 	@echo "  make doc-gifs           		Generate per-feature GIFs for VitePress documentation"
 	@echo "  make release VERSION=x.y.z		Set project version across all files and generate showcase"
+	@echo "  make licenses           		Generate THIRD_PARTY_LICENSES.md from all dependencies"
 	@echo "  make docs-dev           		Start local documentation server (VitePress)"
 	@echo "  make docs-pdf           		Export VitePress documentation to ir2mqtt-docs.pdf"
 	@echo ""
@@ -186,6 +187,17 @@ release:
 	f='pyproject.toml'; c=open(f).read(); open(f,'w').write(re.sub(r'version = \".*\"', 'version = \"$(VERSION)\"', c, count=1))"
 	@echo "Versions updated successfully. Running showcase..."
 	@$(MAKE) showcase
+
+# ── Third-party licenses ──────────────────────────────────────────────────────
+
+licenses:
+	@echo "Generating THIRD_PARTY_LICENSES.md..."
+	@$(PYTHON) -m pip install -q pip-licenses
+	@cd frontend && npx --yes license-checker --json --out ../licenses-frontend.json 2>/dev/null
+	@$(dir $(PYTHON))pip-licenses --from=mixed --format=json --output-file=licenses-backend.json 2>/dev/null
+	@$(PYTHON) scripts/generate_licenses.py
+	@rm -f licenses-frontend.json licenses-backend.json
+	@echo "Written to THIRD_PARTY_LICENSES.md"
 
 # ── Documentation ─────────────────────────────────────────────────────────────
 
